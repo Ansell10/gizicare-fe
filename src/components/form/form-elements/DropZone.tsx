@@ -9,14 +9,17 @@ const DropzoneComponent: React.FC<{ onDrop: (acceptedFiles: File[]) => void }> =
   const [csvData, setCsvData] = useState<any[]>([]); // State untuk menyimpan data CSV yang diparse
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   // Define accepted file types
   const fileAccept: Accept = {
     "text/csv": [], // Only CSV files allowed
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => handleDrop(acceptedFiles),
+    onDrop: (acceptedFiles) => {
+      onDrop(acceptedFiles); // Memanggil fungsi onDrop yang diteruskan dari komponen induk
+      handleDrop(acceptedFiles); // Memanggil fungsi lokal untuk menangani file
+    },
     accept: fileAccept, // Use fileAccept here
     multiple: false, // Allow only one file at a time
   });
