@@ -5,7 +5,7 @@ import { useDropzone, Accept } from "react-dropzone"; // Import Accept
 import Papa from "papaparse"; // Import PapaParse untuk parsing CSV
 
 interface DropzoneComponentProps {
-  onDrop?: (acceptedFiles: File[]) => void; // Membuat onDrop opsional
+  onDrop?: (acceptedFiles: File[]) => void; // Menjadikan onDrop opsional
 }
 
 const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
@@ -21,11 +21,10 @@ const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
-      // Jika onDrop tidak ada, kita tidak melakukan apa-apa
       if (onDrop) {
-        onDrop(acceptedFiles);
+        onDrop(acceptedFiles); // Jika onDrop ada, jalankan fungsi onDrop
       }
-      handleDrop(acceptedFiles);
+      handleDrop(acceptedFiles); // Lanjutkan ke handleDrop meskipun onDrop kosong
     },
     accept: fileAccept,
     multiple: false, // Allow only one file at a time
