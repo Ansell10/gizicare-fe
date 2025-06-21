@@ -1,0 +1,115 @@
+2025-05-24 10:58:14,495 - INFO - Koneksi ke database berhasil.
+2025-05-24 10:58:14,495 - INFO - Memulai Langkah 1: Mengumpulkan link artikel dari halaman kategori...
+2025-05-24 10:58:14,587 - INFO - -> Ditemukan 38 artikel dari https://health.detik.com/wellness-diet
+2025-05-24 10:58:15,733 - INFO - -> Ditemukan 120 artikel dari https://health.detik.com/kebugaran
+2025-05-24 10:58:16,741 - INFO - 
+Langkah 1 Selesai. Total artikel unik yang akan diproses: 77
+
+2025-05-24 10:58:16,741 - INFO - Memulai Langkah 2: Proses scraping dan memasukkan data...
+2025-05-24 10:58:16,915 - INFO - [1/77] SUKSES: Menkes: Orang yang Gajinya 15 Juta Lebih Sehat dan Pintar Dibanding yang 5 Juta
+2025-05-24 10:58:17,010 - INFO - [2/77] SUKSES: WHO Lakukan Efisiensi dan PHK Besar-besaran usai AS Hengkang dari Keanggotaan
+2025-05-24 10:58:17,104 - INFO - [3/77] SUKSES: Ramai-ramai Kampus Kedokteran Protes Kemenkes, Ada Apa?
+2025-05-24 10:58:17,824 - INFO - [4/77] SUKSES: 7 Tanda Kanker Prostat yang Kerap Diabaikan, Waspada yang Sering Sakit Pinggang
+2025-05-24 10:58:18,229 - INFO - [5/77] SUKSES: Pola Asuh Gentle Parenting Lebih Baik dari Ala 'VOC'? Pakar Bilang Gini
+2025-05-24 10:58:18,606 - INFO - [6/77] SUKSES: Kenaikan Kasus COVID-19 Asia Bikin Waswas, Penjualan Masker di Vietnam Meroket
+2025-05-24 10:58:19,058 - INFO - [7/77] SUKSES: 274 RW di Jakarta Siaga TBC, Dinkes Beberkan Faktanya
+2025-05-24 11:01:00,849 - INFO - Koneksi ke database berhasil.
+2025-05-24 11:01:00,850 - INFO - Langkah 1: Mengumpulkan link artikel...
+2025-05-24 11:01:01,966 - INFO - -> 38 artikel dari https://health.detik.com/wellness-diet
+2025-05-24 11:01:03,436 - INFO - -> 120 artikel dari https://health.detik.com/kebugaran
+2025-05-24 11:01:04,439 - INFO - Total artikel unik: 77
+2025-05-24 11:01:04,439 - INFO - Langkah 2: Mulai scraping dan simpan ke DB...
+2025-05-24 11:01:30,237 - INFO - Koneksi ke database berhasil.
+2025-05-24 11:01:30,237 - INFO - Langkah 1: Mengumpulkan link artikel...
+2025-05-24 11:01:30,339 - INFO - -> 38 artikel dari https://health.detik.com/wellness-diet
+2025-05-24 11:01:31,492 - INFO - -> 120 artikel dari https://health.detik.com/kebugaran
+2025-05-24 11:01:32,496 - INFO - Total artikel unik: 77
+2025-05-24 11:01:32,496 - INFO - Langkah 2: Mulai scraping dan simpan ke DB...
+2025-05-24 11:01:32,613 - INFO - [1/77] SUKSES: Menkes: Orang yang Gajinya 15 Juta Lebih Sehat dan Pintar Dibanding yang 5 Juta
+2025-05-24 11:01:32,721 - INFO - [2/77] SUKSES: WHO Lakukan Efisiensi dan PHK Besar-besaran usai AS Hengkang dari Keanggotaan
+2025-05-24 11:01:32,832 - INFO - [3/77] SUKSES: Ramai-ramai Kampus Kedokteran Protes Kemenkes, Ada Apa?
+2025-05-24 11:01:32,946 - INFO - [4/77] SUKSES: 7 Tanda Kanker Prostat yang Kerap Diabaikan, Waspada yang Sering Sakit Pinggang
+2025-05-24 11:01:33,045 - INFO - [5/77] SUKSES: Pola Asuh Gentle Parenting Lebih Baik dari Ala 'VOC'? Pakar Bilang Gini
+2025-05-24 11:01:33,160 - INFO - [6/77] SUKSES: Kenaikan Kasus COVID-19 Asia Bikin Waswas, Penjualan Masker di Vietnam Meroket
+2025-05-24 11:01:33,266 - INFO - [7/77] SUKSES: 274 RW di Jakarta Siaga TBC, Dinkes Beberkan Faktanya
+2025-05-24 11:01:33,382 - INFO - [8/77] SUKSES: Sehat dan Bugar Tapi Kena Stroke di Usia Muda? Dirut RS PON Bicara Pemicunya
+2025-05-24 11:01:33,490 - INFO - [9/77] SUKSES: Ternyata Ini Asal-usul Asam Urat Tinggi Menurut Riset, Bukan Cuma karena Pola Makan
+2025-05-24 11:01:33,612 - INFO - [10/77] SUKSES: Video: Eks Dokter Spesialis RS Kariadi Ngaku Dipecat gegara Menkes Tersinggung
+2025-05-24 11:01:33,744 - INFO - [11/77] SUKSES: Siasat Amel Carla Pangkas BB, Lebih Pilih Nasi Porang ketimbang Nasi Putih
+2025-05-24 11:01:33,866 - INFO - [12/77] SUKSES: Selebgram Ayu Puspa Curhat BB Sempat Naik Lebih 10 Kg gegara Doyan Minum Manis
+2025-05-24 11:01:33,991 - INFO - [13/77] SUKSES: 5 Alasan Protein Paling Efektif Menurunkan Berat Badan
+2025-05-24 11:01:34,322 - INFO - [14/77] SUKSES: Pejuang Body Goals, Ini Cara Efektif Menurunkan BB Tanpa Perlu Kelaparan Seharian
+2025-05-24 11:01:34,462 - INFO - [15/77] SUKSES: Dokter Gizi Ungkap Cara Diet Kurangi Perut Buncit Demi Cegah Risiko Kematian Dini
+2025-05-24 11:01:34,666 - INFO - [16/77] SUKSES: Transformasi Pria Sukses Pangkas BB hingga 138 Kg, Ini Rahasianya
+2025-05-24 11:01:34,773 - INFO - [17/77] SUKSES: Empat RSUD Jakarta Akan Disulap Jadi Rumah Sakit Internasional
+2025-05-24 11:01:34,911 - INFO - [18/77] SUKSES: Bakal Ikut Full Marathon Pertama di Usia 60 Tahun, Ini Persiapan Menkes BGS
+2025-05-24 11:01:35,151 - INFO - [19/77] SUKSES: Bisa-bisanya Tidur Saat Olimpiade, Yaroslava Mahuchikh Nggak Kenal Anxiety?
+2025-05-24 11:01:35,324 - INFO - [20/77] SUKSES: Kekarnya Andika Perkasa Jadi Sorotan Netizen, Masih Bugar di Usia 60 Tahun
+2025-05-24 11:01:36,193 - INFO - [21/77] SUKSES: 5 Tips Olahraga saat Puasa agar Efektif Turunkan BB Menurut Ahli
+2025-05-24 11:01:37,060 - INFO - [22/77] SUKSES: Pekan Kedua Puasa Ramadan, Masih Belum Berani Olahraga? Ini Saran Dokter
+2025-05-24 11:01:38,777 - INFO - [23/77] SUKSES: Ingin Tetap Bugar Saat Puasa? Olahraga Ini Paling Disarankan
+2025-05-24 11:01:39,688 - INFO - [24/77] SUKSES: Olahraga Jelang Sahur Lebih Menantang, Catat Saran Dokter Agar Tak Tumbang
+2025-05-24 11:01:40,578 - INFO - [25/77] SUKSES: Fenomena Balap Lari Jelang Sahur Marak Tiap Ramadan, Ini Wanti-wanti Praktisi Kebugaran
+2025-05-24 11:01:41,406 - INFO - [26/77] SUKSES: Kapan Waktu Olahraga yang Paling Baik Saat Puasa?
+2025-05-24 11:01:42,196 - INFO - [27/77] SUKSES: Serunya Yoga Bareng di Pantai, Sembari Sound Healing dan Belajar Journaling
+2025-05-24 11:01:43,323 - INFO - [28/77] SUKSES: Musuh Tersembunyi Timnas RI di Sydney: Jetlag hingga Imobilitas Long Haul Air Travel
+2025-05-24 11:01:44,409 - INFO - [29/77] SUKSES: Rahasia Bugar Ala David Beckham, Tetap Six Packs di Usia Jelang 50 Tahun
+2025-05-24 11:01:45,259 - INFO - [30/77] SUKSES: Pria Ini Alami Gagal Ginjal Akut usai Squat 2.000 Kali, Kok Bisa?
+2025-05-24 11:01:46,063 - INFO - [31/77] SUKSES: Begini Tips Jalan Kaki Agar Bisa Panjang Umur Menurut Ahli
+2025-05-24 11:01:46,852 - INFO - [32/77] SUKSES: Apa Penyebab Side Stitch? Bikin Perut 'Suduken' Saat Olahraga
+2025-05-24 11:01:47,625 - INFO - [33/77] SUKSES: 4 Kesalahan Jalan Kaki yang Bikin Berat Badan Susah Turun
+2025-05-24 11:01:48,339 - INFO - [34/77] SUKSES: Pria 23 Tahun Lari di Treadmill 24 Jam Nonstop, Ini yang Terjadi Pada Tubuhnya
+2025-05-24 11:01:49,643 - INFO - [35/77] SUKSES: Harus Jalan Kaki Berapa Langkah Sehari untuk Hempaskan Lemak di Perut?
+2025-05-24 11:01:50,822 - INFO - [36/77] SUKSES: Mitos-Fakta Jalan Kaki, Perlu Tahu Biar Lebih Efektif Bakar Lemak Tubuh
+2025-05-24 11:01:51,488 - INFO - [37/77] SUKSES: Ini Alasan Terlalu Keras Berolahraga Bisa Bikin Ginjal Rusak
+2025-05-24 11:01:52,282 - INFO - [38/77] SUKSES: Teknik Jalan Kaki ala Jepang Ini Diklaim Bikin Bugar, Cukup 30-60 Menit Sehari
+2025-05-24 11:01:54,174 - INFO - [39/77] SUKSES: Segini Waktu yang Diperlukan untuk Olahraga agar Tidak Kena Gagal Ginjal Kronis
+2025-05-24 11:01:54,952 - INFO - [40/77] SUKSES: Berapa Kalori yang Terbakar saat Rutin Jalan Kaki? Begini Penjelasannya
+2025-05-24 11:01:55,669 - INFO - [41/77] SUKSES: Kata Mereka soal Poundfit, Olahraga 'Berisik' yang Ternyata Begitu Asyik
+2025-05-24 11:01:56,384 - INFO - [42/77] SUKSES: Donna Agnesia Bagikan Tips Tetap Bugar Meski Jadwal Padat, Mudah Ditiru
+2025-05-24 11:01:57,043 - INFO - [43/77] SUKSES: 5 Cara Memaksimalkan Jalan Kaki untuk Menurunkan Berat Badan
+2025-05-24 11:01:57,724 - INFO - [44/77] SUKSES: Yakin Usia Biologismu Masih Muda? Buktikan dengan Tes Sederhana Ini
+2025-05-24 11:01:58,488 - INFO - [45/77] SUKSES: Ini yang Terjadi Pada Tubuh saat Jalan Kaki Selama 60 Menit
+2025-05-24 11:01:59,760 - INFO - [46/77] SUKSES: Rekomendasi Olahraga untuk Hempaskan Perut Buncit, Cukup 5 Menit di Rumah
+2025-05-24 11:02:00,502 - INFO - [47/77] SUKSES: Sederet Manfaat Jalan Kaki Setelah Makan, Cukup Dilakukan 2 Menit
+2025-05-24 11:02:01,397 - INFO - [48/77] SUKSES: Viral Metode Olahraga '12-3-30' untuk Turunkan BB, Gerak Minimal Efek Maksimal
+2025-05-24 11:02:02,192 - INFO - [49/77] SUKSES: Tak Perlu 10 Ribu Langkah, Segini Rekomendasi Jalan Kaki yang Bisa Cegah Mati Muda
+2025-05-24 11:02:03,014 - INFO - [50/77] SUKSES: Segini Durasi Ideal Jalan Kaki dalam Sehari Biar BB Cepat Turun
+2025-05-24 11:02:03,017 - INFO - --- BATCH COMMIT: 50 records ---
+2025-05-24 11:02:03,956 - INFO - [51/77] SUKSES: Digelar di 10 Kota, Acara Lari One Eighty Run Diikuti 1.100 Pelari
+2025-05-24 11:02:04,798 - INFO - [52/77] SUKSES: Nenek Umur 91 Catat Rekor Lari Cepat, Masih Bugar di Usia Tak Lagi Muda
+2025-05-24 11:02:05,742 - INFO - [53/77] SUKSES: Mau Sehat Saja Harus Bertaruh Nyawa, Jakarta Belum Ramah Pesepeda?
+2025-05-24 11:02:06,604 - INFO - [54/77] SUKSES: Penjelasan Medis 'Fart Walk', Mengatasi Begah Usai Makan dengan Berjalan Kaki
+2025-05-24 11:02:07,449 - INFO - [55/77] SUKSES: Bisa Squat 50 Kali Non Stop? Untuk Umur 20-an, Termasuk Bugar Sih
+2025-05-24 11:02:08,257 - INFO - [56/77] SUKSES: Konsumsi Minuman Berenergi Tiap Hari, Aman Nggak Sih?
+2025-05-24 11:02:09,247 - INFO - [57/77] SUKSES: Viral Atlet Binaraga di Malang Makan Ayam Tiren, Dokter Wanti-wanti Risikonya
+2025-05-24 11:02:10,228 - INFO - [58/77] SUKSES: Viral Binaragawan di Malang Makan Ayam Tiren, Tak Bisakah Diganti Telur?
+2025-05-24 11:02:10,941 - INFO - [59/77] SUKSES: Resep Bugar Ayu Puspa, Selebgram yang Viral karena Tren Kim Seon Ho Smile
+2025-05-24 11:02:11,688 - INFO - [60/77] SUKSES: Jantung Kolaps karena Energy Drink, Mungkinkah?
+2025-05-24 11:02:12,402 - INFO - [61/77] SUKSES: Doyan Minuman Berenergi, Ratu Fitness Meninggal Kena Serangan Jantung
+2025-05-24 11:02:12,837 - INFO - [62/77] SUKSES: Paus Leo XIV, Pemimpin Gereja Katolik Dunia Baru yang Suka Olahraga Tenis
+2025-05-24 11:02:13,554 - INFO - [63/77] SUKSES: Apa yang Terjadi pada Tubuh Saat Berjalan Selama 1 hingga 60 Menit? Ini Kata Dokter
+2025-05-24 11:02:14,184 - INFO - [64/77] SUKSES: Sedang Tak Enak Badan, Amankah Berolahraga? Begini Anjurannya
+2025-05-24 11:02:14,996 - INFO - [65/77] SUKSES: Cara Simpel Usir Visceral Fat, Disebut Menkes Bikin Pria 'Cepat Menghadap Allah'
+2025-05-24 11:02:15,871 - INFO - [66/77] SUKSES: Weekend Ikut Maraton? Ini 3 Tips Agar Terhindar dari Heat Stroke
+2025-05-24 11:02:16,582 - INFO - [67/77] SUKSES: Terungkap Lewat Studi, Jalan Kaki Seperti Ini Dapat Menurunkan Risiko 13 Jenis Kanker
+2025-05-24 11:02:17,268 - INFO - [68/77] SUKSES: Ice Bath usai Maraton, Apa Sih Fungsinya? Cek di Sini
+2025-05-24 11:02:17,992 - INFO - [69/77] SUKSES: Atur Kadar Gula Darah dengan Teknik Duduk-Berjalan 2/20, Ini Caranya
+2025-05-24 11:02:18,424 - INFO - [70/77] SUKSES: Paus Leo Ternyata Suka Olahraga, Sang Pelatih Ungkap Menu Latihannya
+2025-05-24 11:02:18,762 - INFO - [71/77] SUKSES: Minum Energy Drink Biar Kuat 'Push Rank' Mabar Semalaman? Hati-hati, Ini Risikonya
+2025-05-24 11:02:19,150 - INFO - [72/77] SUKSES: Wanita Ini Patah Tulang usai Berguling di Kasur, Penyebabnya Bikin Geleng-geleng
+2025-05-24 11:02:20,105 - INFO - [73/77] SUKSES: Warga di Iran Ramai-ramai Jalani Operasi Hidung, Buat Apa?
+2025-05-24 11:02:20,815 - INFO - [74/77] SUKSES: Kulit Merah-merah Pasca Konsumsi Makanan Tertentu? Hati-hati, Bisa Jadi Rosacea
+2025-05-24 11:02:21,472 - INFO - [75/77] SUKSES: Viral Kulit Pisang Bisa Hempas Kerutan Bak Suntik Botox, Dermatolog Bilang Gini
+2025-05-24 11:02:24,980 - INFO - [76/77] SUKSES: Jajal Banyak Perawatan Wajah Biar Kulit Auto Kencang Awet Muda? Ini Saran Dokter
+2025-05-24 11:02:25,972 - INFO - [77/77] SUKSES: Kulit Susah Banget Glowing? Bisa Jadi Skin Barrier Rusak, Ini Saran Dokter
+2025-05-24 11:02:25,972 - INFO - Langkah 3: Commit sisa data...
+2025-05-24 11:02:25,981 - INFO - Selesai! Total 77 artikel diproses.
+2025-05-24 11:02:25,981 - INFO - Menutup koneksi DB.
+2025-05-24 11:08:16,101 - INFO - • 38 from https://health.detik.com/wellness-diet
+2025-05-24 11:08:17,562 - INFO - • 120 from https://health.detik.com/kebugaran
+2025-05-24 11:08:19,065 - WARNING - [1] attempt 1 failed: unknown encoding: utf8mb4
+2025-05-24 11:08:22,164 - WARNING - [1] attempt 2 failed: 'NoneType' object is not subscriptable
+2025-05-24 11:08:38,969 - INFO - • 38 from https://health.detik.com/wellness-diet
+2025-05-24 11:08:40,149 - INFO - • 120 from https://health.detik.com/kebugaran
+2025-05-24 11:08:41,257 - WARNING - [1] attempt 1 failed: unknown encoding: utf8mb4
