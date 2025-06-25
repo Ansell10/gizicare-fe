@@ -4,29 +4,20 @@ import ComponentCard from "../../common/ComponentCard";
 import { useDropzone, Accept } from "react-dropzone"; // Import Accept
 import Papa from "papaparse"; // Import PapaParse untuk parsing CSV
 
-interface DropzoneComponentProps {
-  onDrop?: (acceptedFiles: File[]) => void; // Menjadikan onDrop opsional
-}
-
-const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
+const DropzoneComponent: React.FC<{ onDrop: (acceptedFiles: File[]) => void }>  = ({ onDrop }) => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<any[]>([]); // State untuk menyimpan data CSV yang diparse
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  
   // Define accepted file types
   const fileAccept: Accept = {
     "text/csv": [], // Only CSV files allowed
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      if (onDrop) {
-        onDrop(acceptedFiles); // Jika onDrop ada, jalankan fungsi onDrop
-      }
-      handleDrop(acceptedFiles); // Lanjutkan ke handleDrop meskipun onDrop kosong
-    },
-    accept: fileAccept,
+    onDrop: (acceptedFiles) => handleDrop(acceptedFiles),
+    accept: fileAccept, // Use fileAccept here
     multiple: false, // Allow only one file at a time
   });
 
@@ -36,6 +27,7 @@ const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
     setError(""); // Reset error
     setCsvData([]); // Reset CSV data
 
+    // Parse the CSV file
     if (file) {
       parseCsv(file);
     }
@@ -45,25 +37,16 @@ const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
     setLoading(true);
     Papa.parse(file, {
       complete: (result) => {
-        setCsvData(result.data);
+        console.log(result);
+        setCsvData(result.data); // Set parsed data
         setLoading(false);
       },
       error: (err) => {
         setError("Error parsing CSV file");
+        console.error(err);
         setLoading(false);
       },
     });
-  };
-
-  // Fungsi untuk menangani perubahan file jika menggunakan tombol Browse
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      setCsvFile(file);
-      setError(""); // Reset error
-      setCsvData([]); // Reset CSV data
-      parseCsv(file);
-    }
   };
 
   return (
@@ -76,6 +59,7 @@ const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
         {/* Hidden Input */}
         <input {...getInputProps()} />
         <div className="dz-message flex flex-col items-center m-0!">
+          {/* Icon Container */}
           <div className="mb-[22px] flex justify-center">
             <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
               <svg
@@ -94,6 +78,7 @@ const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
             </div>
           </div>
 
+          {/* Text Content */}
           <h4 className="mb-3 font-semibold text-gray-800 text-theme-xl dark:text-white/90">
             {isDragActive ? "Drop Files Here" : "Drag & Drop Files Here"}
           </h4>
@@ -103,9 +88,6 @@ const DropzoneComponent: React.FC<DropzoneComponentProps> = ({ onDrop }) => {
           <span className="font-medium underline text-theme-sm text-brand-500">Browse File</span>
         </div>
       </div>
-
-      {/* Pilih file secara manual */}
-      <input type="file" accept=".csv" onChange={handleFileSelect} className="mt-4" />
 
       {/* Tampilkan Data CSV sebagai Tabel */}
       {csvData.length > 0 && (

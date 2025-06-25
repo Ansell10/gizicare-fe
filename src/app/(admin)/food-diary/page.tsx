@@ -46,8 +46,13 @@ interface FoodDiaryEntry {
     meal_type: string;
     portion_size: number;
     notes: string;
-    food_item?: { name: string; calories: number }; // Added calories field
+    food_item?: { name: string; calories: number }; // Optional food item field
+    food_inputs: { // This is the new property you need
+        food_item: { name: string; calories: number };
+        portion_size: number;
+    }[]; // Assuming food_inputs is an array of objects
 }
+
 
 
 const mealTypes = [
@@ -318,13 +323,14 @@ useEffect(() => {
   getFoodDiaryByDate();
 }, [selectedDate, selectedProfile]);
 
-const groupFoodByMealType = (foodDiary: any[]) => {
+const groupFoodByMealType = (foodDiary: FoodDiaryEntry[]) => {
   return foodDiary.reduce((acc, entry) => {
     acc[entry.meal_type] = acc[entry.meal_type] || [];
     acc[entry.meal_type].push(entry);
     return acc;
-  }, {});
+  }, {} as Record<string, FoodDiaryEntry[]>); // Mendefinisikan tipe untuk hasil pengelompokkan
 };
+
 
 const getMealTypeLabel = (mealType: any) => {
   const mealTypeLabels = {

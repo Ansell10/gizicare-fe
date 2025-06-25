@@ -7,9 +7,24 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import api from "@/lib/axios";
 import Cookies from "js-cookie";
 
+interface NotificationData {
+  meal_type?: string;
+  fasting_hours?: number;
+}
+
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  data: NotificationData | string;
+}
+
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +50,7 @@ export default function NotificationDropdown() {
 
     setLoading(true);
     try {
-      const response = await api.get("/notifications", {
+      const response = await api.get<{ notifications: Notification[], unread_count: number }>("/notifications", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +70,7 @@ export default function NotificationDropdown() {
   };
 
   // Mark notification as read
-  const markAsRead = async (notificationId) => {
+  const markAsRead = async (notificationId: number) => {
     const token = Cookies.get("token");
     if (!token) return;
 
@@ -67,14 +82,14 @@ export default function NotificationDropdown() {
       });
 
       // Update local state
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === notificationId 
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === notificationId
             ? { ...notif, is_read: true }
             : notif
         )
       );
-      
+
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
@@ -82,23 +97,22 @@ export default function NotificationDropdown() {
   };
 
   // Format time ago
-  const formatTimeAgo = (timestamp) => {
-    const now = new Date();
-    const notifTime = new Date(timestamp);
-    const diffInMinutes = Math.floor((now - notifTime) / (1000 * 60));
+  const formatTimeAgo = (timestamp: string) => {
+  const now = new Date().getTime(); // Get the current time in milliseconds
+  const notifTime = new Date(timestamp).getTime(); // Convert the notification timestamp to milliseconds
+  const diffInMinutes = Math.floor((now - notifTime) / (1000 * 60)); // Convert the difference to minutes
 
-    if (diffInMinutes < 1) return "Just now";
-    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} hr ago`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-  };
+  if (diffInMinutes < 1) return "Just now";
+  if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
 
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} hr ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+};
   // Get notification icon based on type
-  const getNotificationIcon = (type, data) => {
+  const getNotificationIcon = (type: string, data: NotificationData) => {
     switch (type) {
       case 'meal_reminder':
         const mealType = data?.meal_type || 'meal';
@@ -124,7 +138,7 @@ export default function NotificationDropdown() {
   };
 
   // Get notification background color based on type
-  const getNotificationBgColor = (type) => {
+  const getNotificationBgColor = (type: string) => {
     switch (type) {
       case 'meal_reminder':
         return 'bg-orange-100 text-orange-600';
@@ -140,10 +154,10 @@ export default function NotificationDropdown() {
   // Fetch notifications on component mount
   useEffect(() => {
     fetchNotifications();
-    
+
     // Set up polling for new notifications every 5 minutes
     const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
