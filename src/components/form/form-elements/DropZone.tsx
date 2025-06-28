@@ -4,7 +4,7 @@ import ComponentCard from "../../common/ComponentCard";
 import { useDropzone, Accept } from "react-dropzone"; // Import Accept
 import Papa from "papaparse"; // Import PapaParse untuk parsing CSV
 
-const DropzoneComponent: React.FC<{ onDrop: (acceptedFiles: File[]) => void }>  = ({ onDrop }) => {
+const DropzoneComponent: React.FC<{ onDrop: (acceptedFiles: File[]) => void }> = ({ onDrop }) => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<any[]>([]); // State untuk menyimpan data CSV yang diparse
   const [loading, setLoading] = useState(false);
@@ -30,6 +30,7 @@ const DropzoneComponent: React.FC<{ onDrop: (acceptedFiles: File[]) => void }>  
     // Parse the CSV file
     if (file) {
       parseCsv(file);
+      onDrop(acceptedFiles);
     }
   };
 
@@ -40,6 +41,7 @@ const DropzoneComponent: React.FC<{ onDrop: (acceptedFiles: File[]) => void }>  
         console.log(result);
         setCsvData(result.data); // Set parsed data
         setLoading(false);
+        console.log(file);
       },
       error: (err) => {
         setError("Error parsing CSV file");

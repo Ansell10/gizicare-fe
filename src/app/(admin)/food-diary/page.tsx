@@ -46,13 +46,8 @@ interface FoodDiaryEntry {
     meal_type: string;
     portion_size: number;
     notes: string;
-    food_item?: { name: string; calories: number }; // Optional food item field
-    food_inputs: { // This is the new property you need
-        food_item: { name: string; calories: number };
-        portion_size: number;
-    }[]; // Assuming food_inputs is an array of objects
+    food_item?: { name: string; calories: number }; // Added calories field
 }
-
 
 
 const mealTypes = [
@@ -296,7 +291,6 @@ const getFoodDiaryByDate = async () => {
 
   try {
 
-    console.log("selectedProfile.id", selectedProfile.id);
     const response = await api.get("/food-diary/entries/date", {
       params: {
         date: format(selectedDate, "yyyy-MM-dd"),
@@ -323,25 +317,50 @@ useEffect(() => {
   getFoodDiaryByDate();
 }, [selectedDate, selectedProfile]);
 
-const groupFoodByMealType = (foodDiary: FoodDiaryEntry[]) => {
+// Definisikan tipe untuk FoodInput
+interface FoodInput {
+  id: number;
+  food_item: {
+    name: string;
+    calories: number;
+  };
+  portion_size: number;
+}
+
+// Perbarui tipe untuk FoodDiaryEntry
+interface FoodDiaryEntry {
+  id: number;
+  food_item_id: number;
+  date: string; // Format 'YYYY-MM-DD'
+  meal_type: string;
+  portion_size: number;
+  notes: string;
+  food_item?: { name: string; calories: number }; // Menambahkan field kalori
+  food_inputs: FoodInput[]; // Tambahkan food_inputs yang berisi array dari FoodInput
+}
+
+const groupFoodByMealType = (foodDiary: FoodDiaryEntry[]): Record<string, FoodDiaryEntry[]> => {
   return foodDiary.reduce((acc, entry) => {
     acc[entry.meal_type] = acc[entry.meal_type] || [];
     acc[entry.meal_type].push(entry);
     return acc;
-  }, {} as Record<string, FoodDiaryEntry[]>); // Mendefinisikan tipe untuk hasil pengelompokkan
+  }, {} as Record<string, FoodDiaryEntry[]>);
 };
 
-
-const getMealTypeLabel = (mealType: any) => {
+const getMealTypeLabel = (mealType: string) => {
   const mealTypeLabels = {
     'breakfast': 'Sarapan',
-    'lunch': 'Makan Siang', 
+    'lunch': 'Makan Siang',
     'dinner': 'Makan Malam',
     'snack': 'Camilan'
   };
   
-  return mealTypeLabels[mealType.toLowerCase()] || mealType.toUpperCase();
+  // Pastikan mealType.toLowerCase() adalah salah satu dari kunci objek
+  const lowerCaseMealType = mealType.toLowerCase() as 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  
+  return mealTypeLabels[lowerCaseMealType] || mealType.toUpperCase();
 };
+
 
 const handleDeleteMealType = async (mealType: string) => {
   const token = Cookies.get("token");
@@ -529,10 +548,6 @@ const calculateTotalCalories = () => {
     );
   })}
 </div>
-
-
-
-
 
     {/* Input  */}
     <div className="space-y-6 p-4">

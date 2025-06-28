@@ -5,26 +5,17 @@ import { FlatCompat } from "@eslint/eslintrc";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-  {
-    rules: {
-      // Turn off all rules to effectively disable linting
-      "no-unused-vars": "off",
-      "no-console": "off",
-      "react/no-unescaped-entities": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "no-undef": "off",
-      "react/prop-types": "off",
-      "react/jsx-uses-react": "off",
-      "react/jsx-uses-vars": "off",
-      // Add more rules to turn off as necessary
-    },
-  },
+  { rules: { "@typescript-eslint/no-explicit-any": "off",
+    "react/no-unescaped-entities": "off"
+} },
+  
 ];
 
 export default eslintConfig;

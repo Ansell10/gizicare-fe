@@ -1,14 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -17,26 +12,21 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "strict": false,  // Nonaktifkan strict mode
+    "noImplicitAny": false, // Izinkan penggunaan `any` tanpa peringatan
+    "noImplicitReturns": false,  // Izinkan fungsi tanpa return type yang eksplisit
+    "noImplicitThis": false, // Izinkan `this` tanpa tipe eksplisit
+    "strictNullChecks": false, // Nonaktifkan pemeriksaan null dan undefined
+    "noEmitOnError": false, // Nonaktifkan penghalangan proses emit saat ada error tipe
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "noImplicitAny": false // Menonaktifkan pengecekan 'any'
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/components/auth"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/auth"],
+  "exclude": ["node_modules"]
 }

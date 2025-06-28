@@ -16,27 +16,36 @@ function getActivityFactor(level: string): number {
     active: 1.725,
     'very active': 1.9,
   };
-  
   return factors[level] ?? 1.2; // fallback default
 }
 
+type UserProfile = {
+  id: number;
+  name: string;
+  gender: string;
+  age: number;
+  weight: number;
+  height: number;
+  bmr: number;
+  activity_level: number;
+};
 
 
 function calculateTEE(bmr: number, activityLevel: number) {
   return Math.round(bmr * activityLevel);
 }
 
+interface PayloadEntry {
+  name: string;
+  value: number;
+  color?: string; // Optional karena bisa jadi tidak ada warna
+}
 
-
-type CustomTooltipProps = {
+interface CustomTooltipProps {
   active: boolean;
-  payload: { 
-    name: string;
-    value: number;
-    color: string;
-  }[];
+  payload: PayloadEntry[];
   label: string;
-};
+}
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
@@ -54,18 +63,26 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
+interface CustomTooltipNutritionProps {
+  active: boolean;
+  payload: { payload: PayloadEntry[]; name: string; value: number; color: string }[];
+}
 
-const CustomTooltipNutrition = ({ active, payload, label }: CustomTooltipProps) => {
-  if (active && payload && payload.length) {
-    const data = payload[0]; // Directly access the first entry, as `payload` is an array of objects.
-    const total = payload.reduce((sum, item) => sum + item.value, 0); // Calculate the total of all values
-    const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
+const CustomTooltipNutrition = ({ active, payload }: CustomTooltipNutritionProps) => {
+  if (active && payload && payload.length > 0) {
+    // Pastikan payload[0].payload ada dan berisi data
+    const data = payload[0].payload && payload[0].payload[0]; // Pastikan data ada
+    const allData = payload[0].payload || []; // Dapatkan data pie untuk total
+    const total = allData.length > 0 ? allData.reduce((sum, item) => sum + item.value, 0) : data ? data.value : 0; // Periksa jika data ada
+    const percentage = total > 0 ? ((data?.value / total) * 100).toFixed(1) : 0; // Periksa apakah data ada sebelum mengakses data.value
+    
+    if (!data) return null; // Jika data tidak ada, jangan tampilkan tooltip
 
     return (
       <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-        <p className="font-semibold text-gray-800 mb-2">{label}</p>
+        <p className="font-semibold text-gray-800 mb-2">{data.name}</p>
         <p style={{ color: data.color }} className="text-sm">
-          {data.value.toLocaleString()} {data.name === 'Calories' ? 'kcal' : 'g'}
+          {data.value.toLocaleString()}{data.name === 'Calories' ? ' kcal' : 'g'}
         </p>
         <p className="text-xs text-gray-600">
           {percentage}% of total
@@ -76,8 +93,10 @@ const CustomTooltipNutrition = ({ active, payload, label }: CustomTooltipProps) 
   return null;
 };
 
+
+
 const Dashboard = () => {
-  const [profiles, setProfiles] = useState<UserProfile[]>([]); // Ini sudah benar, pastikan tidak ada null di sini.
+  const [profiles, setProfiles] = useState([]);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
   const [activeFilter, setActiveFilter] = useState('daily');
   
@@ -86,73 +105,12 @@ const Dashboard = () => {
   const [stepsChartData, setStepsChartData] = useState([]);
   const [caloriesLoading, setCaloriesLoading] = useState(false);
   const [stepsLoading, setStepsLoading] = useState(false);
-  const [caloriesSummary, setCaloriesSummary] = useState<CaloriesSummary>({
-    totalIntake: 0,
-    intakeChange: 0,
-    totalBurned: 0,
-    burnedChange: 0,
-    netCalories: 0,
-    netChange: 0,
-    avgNet: 0,
-  });
-
-  const [stepsSummary, setStepsSummary] = useState<StepsSummary>({
-  total: 0,
-  average: 0,
-  change: 0
-});
-
+  const [caloriesSummary, setCaloriesSummary] = useState({});
+  const [stepsSummary, setStepsSummary] = useState({});
   const [nutritionData, setNutritionData] = useState([]);
-  const [nutritionPieData, setNutritionPieData] = useState<NutritionPieData[]>([]);
-  const [summary, setSummary] = useState<Summary>({
-    totalCalories: 0,
-    totalProtein: 0,
-    totalCarbs: 0,
-    totalFat: 0,
-    caloriesChange: 0,
-    proteinChange: 0,
-    carbsChange: 0,
-    fatChange: 0,
-    avgCalories: 0,
-    avgProtein: 0,
-    avgCarbs: 0,
-    avgFat: 0,
-  });
+  const [nutritionPieData, setNutritionPieData] = useState([]);
+  const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(false);
-
-type StepsSummary = {
-  total: number;
-  average: number;
-  change: number;
-};
-
-type CaloriesSummary = {
-  totalIntake: number;         // Total kalori yang masuk
-  intakeChange: number;        // Perubahan total kalori yang masuk
-  totalBurned: number;        // Total kalori yang terbakar
-  burnedChange: number;       // Perubahan kalori yang terbakar
-  netCalories: number;        // Kalori bersih (intake - burned)
-  netChange: number;          // Perubahan kalori bersih
-  avgNet: number;             // Rata-rata kalori bersih per hari (untuk last30Days)
-};
-
-
-type NutritionPieData = {
-  value: number;
-  name: string;
-  color: string; // Add the 'color' property here
-};
-
-type PayloadData = {
-  name: string;
-  value: number;
-  color: string;
-};
-
-type CustomTooltipProps = {
-  active: boolean;
-  payload: { payload: PayloadData }[]; // Array yang berisi objek dengan properti payload
-};
 
   // Shared filter options
   const filterOptions = [
@@ -162,30 +120,12 @@ type CustomTooltipProps = {
     { key: 'last30Days', label: '30 Hari Terakhir', icon: Clock }
   ];
 
-
   // Colors for pie chart
   const NUTRITION_COLORS = {
     protein: '#EF4444',    // Red
     carbs: '#F59E0B',      // Yellow/Orange
     fat: '#8B5CF6',        // Purple
   };
-
-  type Profile = {
-    id: number;
-    name: string;
-  };
-
-  type UserProfile = {
-    id: number;
-    name: string;
-    gender: string;
-    age: number;
-    weight: number;
-    height: number;
-    bmr: number;
-    activity_level: number;
-  };
-
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -207,7 +147,7 @@ type CustomTooltipProps = {
     }
   }, []);
 
-  const fetchCaloriesData = async (filter) => {
+  const fetchCaloriesData = async (filter: string) => {
     const token = Cookies.get("token");
     
     if (!token || !selectedProfile) {
@@ -229,16 +169,7 @@ type CustomTooltipProps = {
       });
 
       const caloriesData = response.data.calories[filter];
-      type TransformedDataItem = {
-        label: string;
-        intake: number;
-        burned: number;
-        net: number;
-        date: string;
-      };
-
-      let transformedData: TransformedDataItem[] = [];
-
+      let transformedData = [];
       
       switch (filter) {
         case 'daily':
@@ -264,45 +195,31 @@ type CustomTooltipProps = {
             netCalories: caloriesData.today.net,
             intakeChange: caloriesData.percentage_changes.intake,
             burnedChange: caloriesData.percentage_changes.burned,
-            netChange: caloriesData.percentage_changes.net,
-            avgNet: caloriesData.averages.daily_net || 0, // Asumsi data ini ada, jika tidak gunakan fallback 0
+            netChange: caloriesData.percentage_changes.net
           });
-
           break;
-          
+        
+      
         case 'weekly':
-          type DayData = {
-            intake: number;
-            burned: number;
-            net: number;
-            // Jika ada properti lainnya, tambahkan di sini
-          };
-
-          transformedData = Object.entries(caloriesData.daily_breakdown || {}).map(([date, dayData]) => {
-            const typedDayData = dayData as DayData;  // Type assertion untuk memberitahu TypeScript tipe sebenarnya
-            return {
-              label: new Date(date).toLocaleDateString('id', { weekday: 'short' }),
-              intake: typedDayData.intake,
-              burned: typedDayData.burned,
-              net: typedDayData.net,
-              date
-            };
-          });
-
+          transformedData = Object.entries(caloriesData.daily_breakdown || {}).map(([date, dayData]) => ({
+            label: new Date(date).toLocaleDateString('id', { weekday: 'short' }),
+            intake: dayData.intake,
+            burned: dayData.burned,
+            net: dayData.net,
+            date
+          }));
           setCaloriesSummary({
-            totalIntake: caloriesData.today.intake,
-            totalBurned: caloriesData.today.burned,
-            netCalories: caloriesData.today.net,
+            totalIntake: caloriesData.current_week.intake,
+            totalBurned: caloriesData.current_week.burned,
+            netCalories: caloriesData.current_week.net,
             intakeChange: caloriesData.percentage_changes.intake,
             burnedChange: caloriesData.percentage_changes.burned,
-            netChange: caloriesData.percentage_changes.net,
-            avgNet: caloriesData.averages.daily_net || 0, // Asumsi data ini ada, jika tidak gunakan fallback 0
+            netChange: caloriesData.percentage_changes.net
           });
-
           break;
           
         case 'monthly':
-          transformedData = (caloriesData.weekly_breakdown || []).map((week) => ({
+          transformedData = (caloriesData.weekly_breakdown || []).map((week: { week: any; intake: any; burned: any; net: any; week_start: any; }) => ({
             label: `Minggu ${week.week}`,
             intake: week.intake,
             burned: week.burned,
@@ -310,71 +227,49 @@ type CustomTooltipProps = {
             date: week.week_start
           }));
           setCaloriesSummary({
-            totalIntake: caloriesData.today.intake,
-            totalBurned: caloriesData.today.burned,
-            netCalories: caloriesData.today.net,
+            totalIntake: caloriesData.current_month.intake,
+            totalBurned: caloriesData.current_month.burned,
+            netCalories: caloriesData.current_month.net,
             intakeChange: caloriesData.percentage_changes.intake,
             burnedChange: caloriesData.percentage_changes.burned,
-            netChange: caloriesData.percentage_changes.net,
-            avgNet: caloriesData.averages.daily_net || 0, // Asumsi data ini ada, jika tidak gunakan fallback 0
+            netChange: caloriesData.percentage_changes.net
           });
-
           break;
           
         case 'last30Days':
-          transformedData = (caloriesData.daily_data || []).map(day => ({
+          transformedData = (caloriesData.daily_data || []).map((day: { date: string | number | Date; intake: any; burned: any; net: any; }) => ({
             label: new Date(day.date).getDate().toString(),
             intake: day.intake,
             burned: day.burned,
             net: day.net,
             date: day.date
           }));
-         setCaloriesSummary({
-            totalIntake: caloriesData.today.intake,
-            totalBurned: caloriesData.today.burned,
-            netCalories: caloriesData.today.net,
-            intakeChange: caloriesData.percentage_changes.intake,
-            burnedChange: caloriesData.percentage_changes.burned,
-            netChange: caloriesData.percentage_changes.net,
-            avgNet: caloriesData.averages.daily_net || 0, // Asumsi data ini ada, jika tidak gunakan fallback 0
+          setCaloriesSummary({
+            totalIntake: caloriesData.totals.intake,
+            totalBurned: caloriesData.totals.burned,
+            netCalories: caloriesData.totals.net,
+            avgIntake: caloriesData.averages.daily_intake,
+            avgBurned: caloriesData.averages.daily_burned,
+            avgNet: caloriesData.averages.daily_net
           });
-
           break;
           
         default:
           transformedData = [];
-          setCaloriesSummary({
-            totalIntake: caloriesData.today.intake,
-            totalBurned: caloriesData.today.burned,
-            netCalories: caloriesData.today.net,
-            intakeChange: caloriesData.percentage_changes.intake||0,
-            burnedChange: caloriesData.percentage_changes.burned||0,
-            netChange: caloriesData.percentage_changes.net||0,
-            avgNet: caloriesData.averages.daily_net || 0, // Asumsi data ini ada, jika tidak gunakan fallback 0
-          });
-
+          setCaloriesSummary({ totalIntake: 0, totalBurned: 0, netCalories: 0 });
       }
-      const [caloriesChartData, setCaloriesChartData] = useState<TransformedDataItem[]>([]);
+      
       setCaloriesChartData(transformedData);
     } catch (err) {
       console.error("Gagal fetch calories data:", err);
       setCaloriesChartData([]);
-      setCaloriesSummary({
-            totalIntake: 0,
-            totalBurned:0,
-            netCalories: 0,
-            intakeChange: 0,
-            burnedChange: 0,
-            netChange: 0,
-            avgNet: 0, // Asumsi data ini ada, jika tidak gunakan fallback 0
-          });
-
+      setCaloriesSummary({ totalIntake: 0, totalBurned: 0, netCalories: 0 });
     } finally {
       setCaloriesLoading(false);
     }
   };
 
-  const fetchStepsData = async (filter) => {
+  const fetchStepsData = async (filter: string) => {
     const token = Cookies.get("token");
     
     if (!token || !selectedProfile) {
@@ -395,86 +290,77 @@ type CustomTooltipProps = {
         },
       });
 
-  const stepsData = response.data.steps[filter];
-  
-  // Definisikan Tipe untuk TransformedDataItem
-  type TransformedDataItem = {
-    label: string;
-    steps: number;
-    date: string;
+      const stepsData = response.data.steps[filter];
+      let transformedData = [];
+      
+      switch (filter) {
+        case 'daily':
+          transformedData = [
+            { label: 'Kemarin', steps: stepsData.yesterday, date: stepsData.date },
+            { label: 'Hari ini', steps: stepsData.today, date: stepsData.date }
+          ];
+          setStepsSummary({
+            total: stepsData.today,
+            average: stepsData.today,
+            change: stepsData.percentage_change
+          });
+          break;
+          
+        case 'weekly':
+          transformedData = Object.entries(stepsData.daily_breakdown || {}).map(([date, steps]) => ({
+            label: new Date(date).toLocaleDateString('id', { weekday: 'short' }),
+            steps,
+            date
+          }));
+          setStepsSummary({
+            total: stepsData.current_week,
+            average: Math.round(stepsData.current_week / 7),
+            change: stepsData.percentage_change
+          });
+          break;
+          
+        case 'monthly':
+          transformedData = (stepsData.weekly_breakdown || []).map((week: { total_steps: any; week_start: any; }, index: number) => ({
+            label: `Minggu ${index + 1}`,
+            steps: week.total_steps,
+            date: week.week_start
+          }));
+          setStepsSummary({
+            total: stepsData.current_month,
+            average: Math.round(stepsData.current_month / 30),
+            change: stepsData.percentage_change
+          });
+          break;
+          
+        case 'last30Days':
+          transformedData = (stepsData.daily_data || []).map((day: { date: string | number | Date; steps: any; }) => ({
+            label: new Date(day.date).getDate().toString(),
+            steps: day.steps,
+            date: day.date
+          }));
+          setStepsSummary({
+            total: stepsData.total_steps,
+            average: stepsData.average_daily,
+            change: 0
+          });
+          break;
+          
+        default:
+          transformedData = [];
+          setStepsSummary({ total: 0, average: 0, change: 0 });
+      }
+      
+      setStepsChartData(transformedData);
+    } catch (err) {
+      console.error("Gagal fetch steps data:", err);
+      setStepsChartData([]);
+      setStepsSummary({ total: 0, average: 0, change: 0 });
+    } finally {
+      setStepsLoading(false);
+    }
   };
 
-  let transformedData: TransformedDataItem[] = [];
-  
-  switch (filter) {
-    case 'daily':
-      transformedData = [
-        { label: 'Kemarin', steps: Number(stepsData.yesterday), date: stepsData.date },
-        { label: 'Hari ini', steps: Number(stepsData.today), date: stepsData.date }
-      ];
-      setStepsSummary({
-        total: stepsData.today,
-        average: stepsData.today,
-        change: stepsData.percentage_change
-      });
-      break;
-      
-    case 'weekly':
-      transformedData = Object.entries(stepsData.daily_breakdown || {}).map(([date, steps]) => ({
-        label: new Date(date).toLocaleDateString('id', { weekday: 'short' }),
-        steps: Number(steps), // Pastikan steps bertipe number
-        date
-      }));
-      setStepsSummary({
-        total: stepsData.current_week,
-        average: Math.round(stepsData.current_week / 7),
-        change: stepsData.percentage_change
-      });
-      break;
-      
-    case 'monthly':
-      transformedData = (stepsData.weekly_breakdown || []).map((week, index) => ({
-        label: `Minggu ${index + 1}`,
-        steps: Number(week.total_steps), // Pastikan total_steps bertipe number
-        date: week.week_start
-      }));
-      setStepsSummary({
-        total: stepsData.current_month,
-        average: Math.round(stepsData.current_month / 30),
-        change: stepsData.percentage_change
-      });
-      break;
-      
-    case 'last30Days':
-      transformedData = (stepsData.daily_data || []).map(day => ({
-        label: new Date(day.date).getDate().toString(),
-        steps: Number(day.steps), // Pastikan steps bertipe number
-        date: day.date
-      }));
-      setStepsSummary({
-        total: stepsData.total_steps,
-        average: stepsData.average_daily,
-        change: 0
-      });
-      break;
-      
-    default:
-      transformedData = [];
-      setStepsSummary({ total: 0, average: 0, change: 0 });
-  }
-  const [StepsChartData, setStepsChartData] = useState<TransformedDataItem[]>([]);
-  setStepsChartData(transformedData);
-} catch (err) {
-  console.error("Gagal fetch steps data:", err);
-  setStepsChartData([]);
-  setStepsSummary({ total: 0, average: 0, change: 0 });
-} finally {
-  setStepsLoading(false);
-}
-};
-
-
-  const fetchNutritionData = async (filter) => {
+  const fetchNutritionData = async (filter: string) => {
     const token = Cookies.get("token");
     
     if (!token || !selectedProfile) {
@@ -496,18 +382,8 @@ type CustomTooltipProps = {
       });
 
       const nutritionResponse = response.data.nutrition[filter];
-      type TransformedDataItem = {
-        label: string;
-        calories: number,
-        protein: number,
-        carbs: number,
-        fat: number,
-        date: string;
-      };
-
-      let transformedData: TransformedDataItem[] = [];
-
-      let pieData = [];
+      let transformedData = [];
+      let pieData: ((prevState: never[]) => never[]) | { name: string; value: number; color: string; }[] = [];
       
       switch (filter) {
         case 'daily':
@@ -530,18 +406,8 @@ type CustomTooltipProps = {
             }
           ];
           
-          
-          type PieDataItem = {
-            name: string;
-            value: number;
-            color: string;
-          };
-
-          let pieData: PieDataItem[] = []; // Declare pieData with correct type
-
           // Create pie chart data for today's nutrition
           const todayData = nutritionResponse.today;
-
           if (todayData && (todayData.protein > 0 || todayData.carbs > 0 || todayData.fat > 0)) {
             pieData = [
               {
@@ -561,46 +427,29 @@ type CustomTooltipProps = {
               }
             ].filter(item => item.value > 0); // Only include items with values
           }
-
           
           setSummary({
-            totalCalories: nutritionResponse.totals.calories,
-            totalProtein: nutritionResponse.totals.protein,
-            totalCarbs: nutritionResponse.totals.carbs,
-            totalFat: nutritionResponse.totals.fat,
+            totalCalories: nutritionResponse.today.calories,
+            totalProtein: nutritionResponse.today.protein,
+            totalCarbs: nutritionResponse.today.carbs,
+            totalFat: nutritionResponse.today.fat,
             caloriesChange: nutritionResponse.percentage_changes.calories,
             proteinChange: nutritionResponse.percentage_changes.protein,
             carbsChange: nutritionResponse.percentage_changes.carbs,
             fatChange: nutritionResponse.percentage_changes.fat,
-            avgCalories: nutritionResponse.averages.daily_calories,  // New property
-            avgProtein: nutritionResponse.averages.daily_protein,    // New property
-            avgCarbs: nutritionResponse.averages.daily_carbs,        // New property
-            avgFat: nutritionResponse.averages.daily_fat,            // New property
+            mealBreakdown: nutritionResponse.today.meal_breakdown
           });
-
           break;
           
         case 'weekly':
-          type DayData = {
-            calories: number;
-            protein: number;
-            carbs: number;
-            fat: number;
-            // Jika ada properti lainnya, tambahkan di sini
-          };
-
-          transformedData = Object.entries(nutritionResponse.daily_breakdown || {}).map(([date, dayData]) => {
-            const typedDayData = dayData as DayData;  // Declare typedDayData here
-            return {
-              label: new Date(date).toLocaleDateString('en', { weekday: 'short' }),
-              calories: typedDayData.calories,
-              protein: typedDayData.calories,
-              carbs: typedDayData.calories,
-              fat: typedDayData.calories,
-              date
-            };
-          });
-
+          transformedData = Object.entries(nutritionResponse.daily_breakdown || {}).map(([date, dayData]) => ({
+            label: new Date(date).toLocaleDateString('en', { weekday: 'short' }),
+            calories: dayData.calories,
+            protein: dayData.protein,
+            carbs: dayData.carbs,
+            fat: dayData.fat,
+            date
+          }));
           
           // Create pie chart data for current week totals
           const weekData = nutritionResponse.current_week;
@@ -625,24 +474,19 @@ type CustomTooltipProps = {
           }
           
           setSummary({
-            totalCalories: nutritionResponse.totals.calories,
-            totalProtein: nutritionResponse.totals.protein,
-            totalCarbs: nutritionResponse.totals.carbs,
-            totalFat: nutritionResponse.totals.fat,
+            totalCalories: nutritionResponse.current_week.calories,
+            totalProtein: nutritionResponse.current_week.protein,
+            totalCarbs: nutritionResponse.current_week.carbs,
+            totalFat: nutritionResponse.current_week.fat,
             caloriesChange: nutritionResponse.percentage_changes.calories,
             proteinChange: nutritionResponse.percentage_changes.protein,
             carbsChange: nutritionResponse.percentage_changes.carbs,
-            fatChange: nutritionResponse.percentage_changes.fat,
-            avgCalories: nutritionResponse.averages.daily_calories,  // New property
-            avgProtein: nutritionResponse.averages.daily_protein,    // New property
-            avgCarbs: nutritionResponse.averages.daily_carbs,        // New property
-            avgFat: nutritionResponse.averages.daily_fat,            // New property
+            fatChange: nutritionResponse.percentage_changes.fat
           });
-
           break;
           
         case 'monthly':
-          transformedData = (nutritionResponse.weekly_breakdown || []).map((week) => ({
+          transformedData = (nutritionResponse.weekly_breakdown || []).map((week: { week: any; calories: any; protein: any; carbs: any; fat: any; week_start: any; }) => ({
             label: `Minggu ${week.week}`,
             calories: week.calories,
             protein: week.protein,
@@ -674,24 +518,19 @@ type CustomTooltipProps = {
           }
           
           setSummary({
-            totalCalories: nutritionResponse.totals.calories,
-            totalProtein: nutritionResponse.totals.protein,
-            totalCarbs: nutritionResponse.totals.carbs,
-            totalFat: nutritionResponse.totals.fat,
+            totalCalories: nutritionResponse.current_month.calories,
+            totalProtein: nutritionResponse.current_month.protein,
+            totalCarbs: nutritionResponse.current_month.carbs,
+            totalFat: nutritionResponse.current_month.fat,
             caloriesChange: nutritionResponse.percentage_changes.calories,
             proteinChange: nutritionResponse.percentage_changes.protein,
             carbsChange: nutritionResponse.percentage_changes.carbs,
-            fatChange: nutritionResponse.percentage_changes.fat,
-            avgCalories: nutritionResponse.averages.daily_calories,  // New property
-            avgProtein: nutritionResponse.averages.daily_protein,    // New property
-            avgCarbs: nutritionResponse.averages.daily_carbs,        // New property
-            avgFat: nutritionResponse.averages.daily_fat,            // New property
+            fatChange: nutritionResponse.percentage_changes.fat
           });
-
           break;
           
         case 'last30Days':
-          transformedData = (nutritionResponse.daily_data || []).map(day => ({
+          transformedData = (nutritionResponse.daily_data || []).map((day: { date: string | number | Date; calories: any; protein: any; carbs: any; fat: any; }) => ({
             label: new Date(day.date).getDate().toString(),
             calories: day.calories,
             protein: day.protein,
@@ -727,58 +566,26 @@ type CustomTooltipProps = {
             totalProtein: nutritionResponse.totals.protein,
             totalCarbs: nutritionResponse.totals.carbs,
             totalFat: nutritionResponse.totals.fat,
-            caloriesChange: nutritionResponse.percentage_changes.calories,
-            proteinChange: nutritionResponse.percentage_changes.protein,
-            carbsChange: nutritionResponse.percentage_changes.carbs,
-            fatChange: nutritionResponse.percentage_changes.fat,
-            avgCalories: nutritionResponse.averages.daily_calories,  // New property
-            avgProtein: nutritionResponse.averages.daily_protein,    // New property
-            avgCarbs: nutritionResponse.averages.daily_carbs,        // New property
-            avgFat: nutritionResponse.averages.daily_fat,            // New property
+            avgCalories: nutritionResponse.averages.daily_calories,
+            avgProtein: nutritionResponse.averages.daily_protein,
+            avgCarbs: nutritionResponse.averages.daily_carbs,
+            avgFat: nutritionResponse.averages.daily_fat
           });
-
           break;
           
         default:
           transformedData = [];
           pieData = [];
-          setSummary({
-            totalCalories: 0,
-            totalProtein: 0,
-            totalCarbs: 0,
-            totalFat: 0,
-            caloriesChange: nutritionResponse.percentage_changes.calories,
-            proteinChange: nutritionResponse.percentage_changes.protein,
-            carbsChange: nutritionResponse.percentage_changes.carbs,
-            fatChange: nutritionResponse.percentage_changes.fat,
-            avgCalories: nutritionResponse.averages.daily_calories,  // New property
-            avgProtein: nutritionResponse.averages.daily_protein,    // New property
-            avgCarbs: nutritionResponse.averages.daily_carbs,        // New property
-            avgFat: nutritionResponse.averages.daily_fat,            // New property
-          });
-
+          setSummary({ totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 });
       }
-      const [StepsNutritionData, setNutritionData] = useState<TransformedDataItem[]>([]);
+      
       setNutritionData(transformedData);
       setNutritionPieData(pieData);
     } catch (err) {
       console.error("Gagal fetch nutrition data:", err);
       setNutritionData([]);
       setNutritionPieData([]);
-      setSummary({
-            totalCalories: 0,
-            totalProtein: 0,
-            totalCarbs: 0,
-            totalFat: 0,
-            caloriesChange:0,
-            proteinChange:0,
-            carbsChange:0,
-            fatChange: 0,
-            avgCalories: 0,  // New property
-            avgProtein: 0,    // New property
-            avgCarbs: 0,        // New property
-            avgFat: 0,            // New property
-          });
+      setSummary({ totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 });
     } finally {
       setLoading(false);
     }
@@ -792,26 +599,26 @@ type CustomTooltipProps = {
     }
   }, [activeFilter, selectedProfile]);
 
-  const formatYAxisTick = (value) => {
+  const formatYAxisTick = (value: number) => {
     if (Math.abs(value) >= 1000) {
       return `${(value / 1000).toFixed(1)}k`;
     }
     return value;
   };
 
-  const getChangeColor = (change) => {
+  const getChangeColor = (change: number) => {
     if (change > 0) return 'text-green-600';
     if (change < 0) return 'text-red-600';
     return 'text-gray-600';
   };
 
-  const getChangeIcon = (change) => {
+  const getChangeIcon = (change: number) => {
     if (change > 0) return '↗';
     if (change < 0) return '↘';
     return '→';
   };
 
-  const getBarColor = (filter) => {
+  const getBarColor = (filter: string) => {
     const colors = {
       daily: '#3B82F6',
       weekly: '#10B981',
@@ -848,7 +655,7 @@ type CustomTooltipProps = {
 
   
   const TEE = selectedProfile
-  ? calculateTEE(selectedProfile.bmr, getActivityFactor(String(selectedProfile.activity_level)))
+  ? calculateTEE(selectedProfile.bmr, getActivityFactor(selectedProfile.activity_level))
   : 0;
 
   console.log("BMR:", selectedProfile?.bmr);
@@ -856,20 +663,6 @@ type CustomTooltipProps = {
   console.log("TEE:", TEE);
 
 
-  type Summary = {
-  totalCalories: number;
-  totalProtein: number;
-  totalCarbs: number;
-  totalFat: number;
-  caloriesChange: number;
-  proteinChange: number;
-  carbsChange: number;
-  fatChange: number;
-  avgCalories: number; // Added property for average calories
-  avgProtein: number;  // Added property for average protein
-  avgCarbs: number;    // Added property for average carbs
-  avgFat: number;      // Added property for average fat
-};
 
   
 
@@ -890,7 +683,7 @@ type CustomTooltipProps = {
             value={selectedProfile?.id || ""}
             onChange={(e) => {
               const p = profiles.find((p) => p.id === +e.target.value);
-              setSelectedProfile(p || null); // Use null if no profile is found
+              setSelectedProfile(p);
             }}
             className="block w-full pl-10 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 appearance-none"
           >
@@ -1055,7 +848,7 @@ type CustomTooltipProps = {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltipNutrition active={false} payload={[]} label={""} />} />
+                    <Tooltip content={<CustomTooltipNutrition active={false} payload={[]} />} />
                     <Legend 
                       verticalAlign="bottom" 
                       height={50}
@@ -1361,6 +1154,7 @@ type CustomTooltipProps = {
                       stroke="#666"
                     />
                     <YAxis 
+                      domain={[0, Math.max(...caloriesChartData.map(d => Math.max(d.intake, d.burned, d.net)), TEE) + 200]} 
                       tickFormatter={formatYAxisTick}
                       tick={{ fontSize: 12 }}
                       stroke="#666"
