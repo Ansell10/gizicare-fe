@@ -309,7 +309,11 @@ export default function ActivityDiaryDashboard() {
     const caloriesBurned = caloriesBurnedExercise + caloriesBurnedSteps;
 
     // remaining = TEE + calories burned − calorie intake
-    const remainingCalories = Math.round(tee + caloriesBurned - caloriesIn);
+
+    // const remainingCalories = Math.round(tee + caloriesBurned - caloriesIn);
+
+    // SISA KALORI: TEE - asupan kalori saja (tanpa kalori terbakar olahraga)
+    const remainingCalories = Math.round(tee - caloriesIn);
 
     // ── HITUNG TARGET HIDRASI ──
     const weightKg = selectedProfile?.weight ?? 0;
@@ -440,6 +444,10 @@ export default function ActivityDiaryDashboard() {
 
     return (
         <div className="space-y-8">
+            {/* Greeting */}
+            <div className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+                {selectedProfile ? `Hai, ${selectedProfile.name}!` : "Selamat datang!"}
+            </div>
             {/* Pilih Pengguna */}
             <div className="w-full">
                 <label
@@ -494,13 +502,13 @@ export default function ActivityDiaryDashboard() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <StatCard Icon={Bed} title="Durasi Tidur" value={`${sleep} jam`} />
+                <StatCard Icon={(props) => <Bed {...props} className="w-6 h-6 text-purple-400 dark:text-purple-500" />} title="Durasi Tidur" value={`${sleep} jam`} />
                 <StatCard
-                    Icon={Activity}
-                    title="Jenis Olahraga"
+                    Icon={(props) => <Activity {...props} className="w-6 h-6 text-pink-400 dark:text-pink-500" />}
+                    title="Jenis Olahraga Terakhir"
                     value={dailyActivity?.latest_exercise_name || "-"}
                 />
-                <StatCard
+                {/* <StatCard
                     Icon={Clock}
                     title="Durasi Olahraga"
                     value={`${dailyActivity?.total_duration ?? 0} menit`}
@@ -509,9 +517,9 @@ export default function ActivityDiaryDashboard() {
                     Icon={Footprints}
                     title="Jumlah Langkah"
                     value={dailyActivity?.total_steps ?? 0}
-                />
+                /> */}
 
-                <StatCard Icon={Scale} title="BMI" value={bmi.toFixed(1)} />
+                <StatCard Icon={(props) => <Scale {...props} className="w-6 h-6 text-yellow-400 dark:text-yellow-500" />} title="BMI" value={bmi.toFixed(1)} />
                 {/* Ganti StatCard Zap dengan custom card */}
                 <div className="rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 flex items-center justify-between">
                     {/* Icon + Title & Value di kiri */}
@@ -524,28 +532,52 @@ export default function ActivityDiaryDashboard() {
                             <div className="text-2xl font-bold text-gray-800 dark:text-white">
                                 {tee.toFixed(0)} kcal
                             </div>
+                            {/* Progress Bar */}
+                            <div className="w-40 h-2 bg-gray-200 rounded mt-2 overflow-hidden">
+                                <div
+                                    className="h-2 bg-green-400 rounded transition-all duration-700"
+                                    style={{
+                                        width: `${Math.min((caloriesIn / (tee || 1)) * 100, 100)}%`
+                                    }}
+                                />
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                                Asupan: {caloriesIn} kcal ({Math.round((caloriesIn / (tee || 1)) * 100)}%)
+                            </div>
                         </div>
                     </div>
 
                     {/* Trend di kanan */}
                     <div className="text-sm text-green-500 whitespace-nowrap">
-                        {remainingCalories} kcal Remaining
+                        Kurang {remainingCalories} kcal 
                     </div>
                 </div>
 
                 {/* GANTI StatCard “Asupan Air” dengan ini saja */}
                 <div className="rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Droplet className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                        <Droplet className="w-6 h-6 text-blue-400 dark:text-blue-500" />
                         <div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">Asupan Air</div>
                             <div className="text-2xl font-bold">
                                 {dailyActivity?.total_water ?? waterConsumed} mL
                             </div>
+                            {/* Progress Bar */}
+                            <div className="w-40 h-2 bg-gray-200 rounded mt-2">
+                                <div
+                                    className="h-2 bg-blue-400 rounded"
+                                    style={{
+                                        width: `${Math.min((waterConsumed / (recommendedWaterMl || 1)) * 100, 100)}%`
+                                    }}
+                                />
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                                Target: {recommendedWaterMl} mL ({Math.round((waterConsumed / (recommendedWaterMl || 1)) * 100)}%)
+                            </div>
                         </div>
                     </div>
                     <div className="text-sm text-green-500 mt-1">
-                        {recommendedWaterMl - waterConsumed} mL Remaining
+                        Kurang {recommendedWaterMl - waterConsumed} mL
                     </div>
                 </div>
 
@@ -555,11 +587,42 @@ export default function ActivityDiaryDashboard() {
                     value={`${dailyActivity?.total_calories ?? calorieIntake} kcal`}
                 /> */}
                 <StatCard
-                    Icon={nutritionStatus === "Kekurangan kalori" ? TrendingDown : TrendingUp}
+                    Icon={(props) =>
+                        nutritionStatus === "Kekurangan kalori"
+                            ? <TrendingDown {...props} className="w-6 h-6 text-red-400 dark:text-red-500" />
+                            : <TrendingUp {...props} className="w-6 h-6 text-green-400 dark:text-green-500" />
+                    }
                     title="Status Nutrisi"
                     value={nutritionStatus}
                 />
+
+                {/* CARD BARU: Kalori Terbakar, Langkah, Durasi Olahraga */}
+                <div className="rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        <Zap className="w-6 h-6 text-orange-400 dark:text-orange-500" />
+                        <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                                Kalori Terbakar (Aktivitas)
+                            </div>
+                            <div className="text-2xl font-bold text-gray-800 dark:text-white">
+                                {Math.round(caloriesBurned)} kcal
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
+                        <span>
+                            <Footprints className="inline w-4 h-4 mr-1 text-indigo-400 dark:text-indigo-500" />
+                            Langkah: <b>{steps}</b>
+                        </span>
+                        <span>
+                            <Activity className="inline w-4 h-4 mr-1 text-pink-400 dark:text-pink-500" />
+                            Durasi Olahraga: <b>{totalMinutes}</b> menit
+                        </span>
+                    </div>
+                </div>
             </div>
+
+            
 
             {/* ◀️ Date Navigation ▶️ */}
             <div className="flex items-center justify-between my-6">
