@@ -1,323 +1,38 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { format, addDays, isToday } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import api from "@/lib/axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
+import { motion } from "framer-motion";
 
+// Icon
+import { ArrowLeft, ArrowRight, Trash2, User2, ChevronDown } from "lucide-react";
+
+// Components
 import ComponentCard from "@/components/common/ComponentCard";
 import Button from "@/components/ui/button/Button";
 import TextArea from "@/components/form/input/TextArea";
 
-import {
-    ArrowLeft,
-    ArrowRight,
-    Trash2,
-} from "lucide-react";
-
-import { motion, AnimatePresence } from "framer-motion";
-
-
-import "react-day-picker/dist/style.css";
-import { Filter, User2, ChevronDown } from "lucide-react";
-
-// Type Definitions
+// Tipe untuk kategori makanan
 interface FoodCategory {
-    id: number;
-    name: string;
-    icon: string;
+  id: number;
+  name: string;
+  icon: string;
 }
 
+// Tipe untuk item makanan
 interface FoodItem {
-    id: number;
-    name: string;
-    image: string;
-    calories: number;
-    category_id: number;
+  id: number;
+  name: string;
+  image: string;
+  calories: number;
+  category_id: number;
 }
 
-interface FoodDiaryEntry {
-    id: number;
-    food_item_id: number;
-    date: string; // Format 'YYYY-MM-DD'
-    meal_type: string;
-    portion_size: number;
-    notes: string;
-    food_item?: { name: string; calories: number }; // Added calories field
-}
-
-
-const mealTypes = [
-    { id: 'breakfast', name: 'Sarapan' },
-    { id: 'lunch', name: 'Makan Siang' },
-    { id: 'dinner', name: 'Makan Malam' },
-    { id: 'snack', name: 'Camilan' }
-];
-
-export default function FoodDiaryPage() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [foodCategories, setFoodCategories] = useState<FoodCategory[]>([]);
-  const [foodItems, setFoodItems] = useState<Record<string, FoodItem[]>>({});
-  const [selectedCategory, setSelectedCategory] = useState<number>(0);
-  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
-  const [selectedFoods, setSelectedFoods] = useState<{ foodItemId: number; portionSize: number }[]>([]);
-  const [notes, setNotes] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
-  const [selectedFoodItem, setSelectedFoodItem] = useState<number | null>(null); // Untuk melacak ID makanan yang sedang dipilih
-  const [portionSize, setPortionSize] = useState<number>(1); // Ukuran porsi yang dimasukkan oleh pengguna
-  const [allFoodItems, setAllFoodItems] = useState<FoodItem[]>([]); // Penyimpanan semua makanan
-  const [foodDiary, setFoodDiary] = useState<any[]>([]);
-
-
-
-
-  const MotionButton = motion.create(Button);
-
-  //  1) FETCH PROFILE SEKALIGUS SAAT KOMPONEN DI‐MOUNT
-  useEffect(() => {
-      // Ambil token dari cookie (karena route /profiles dan /exercises dilindungi auth:sanctum)
-      const token = Cookies.get("token");
-
-      // 1a) Fetch profiles milik user yang login
-      if (token) {
-          api
-              .get("/profiles", {
-                  headers: {
-                      Authorization: `Bearer ${token}`,
-                  },
-              })
-              .then((res) => {
-                  setProfiles(res.data);
-                  setSelectedProfile(res.data[0]);
-              })
-              .catch((err) => {
-                  console.error("Gagal fetch profiles:", err);
-              });
-      }
-  },[]);
-
-  // Fetch Food Categories
-  useEffect(() => {
-  const fetchCategories = async () => {
-    const token = Cookies.get("token");
-    if (!token) {
-      setErrorMessage("Token tidak ditemukan. Silakan login.");
-      return;
-    }
-
-    try {
-      const response = await api.get<{ data: FoodCategory[] }>("food-diary/categories", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setFoodCategories(response.data.data); // Set kategori makanan
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      setErrorMessage("Terjadi kesalahan saat mengambil kategori makanan.");
-    }
-  };
-
-  fetchCategories();
-  }, []);
-
-// Fetch Semua Makanan hanya sekali saat komponen pertama kali dimuat
-  useEffect(() => {
-    const fetchAllFoodItems = async () => {
-      const token = Cookies.get('token');
-      if (!token) {
-        setErrorMessage("Token tidak ditemukan. Silakan login.");
-        return;
-      }
-
-      try {
-        const response = await api.get<{ data: FoodItem[] }>('food-diary/food-items/all', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Simpan semua makanan yang diambil
-        setAllFoodItems(response.data.data);
-      } catch (error) {
-        console.error("Error fetching all food items:", error);
-        setErrorMessage("Terjadi kesalahan saat mengambil semua makanan.");
-      }
-    };
-
-    fetchAllFoodItems();
-  }, []); // Hanya dipanggil sekali saat komponen pertama kali dimuat
-
-  // Fetch food items berdasarkan kategori yang dipilih
-  useEffect(() => {
-    if (selectedCategory === 0) return; // Jika "Semua" dipilih, tidak perlu fetch kategori lainnya
-
-    const fetchFoodItems = async () => {
-      const token = Cookies.get('token');
-      if (!token) {
-        setErrorMessage("Token tidak ditemukan. Silakan login.");
-        return;
-      }
-
-      try {
-        const response = await api.get<{ data: FoodItem[] }>(`food-diary/food-items/${selectedCategory}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Simpan makanan berdasarkan kategori yang dipilih
-        setFoodItems((prevItems) => ({
-          ...prevItems,
-          [selectedCategory]: response.data.data,
-        }));
-      } catch (error) {
-        console.error("Error fetching food items:", error);
-        setErrorMessage("Terjadi kesalahan saat mengambil makanan berdasarkan kategori.");
-      }
-    };
-
-    fetchFoodItems();
-  }, [selectedCategory]); // Hanya dipanggil saat kategori dipilih
-
-  
-  // Handle selecting food and portion
-  const handleAddFood = (foodItemId: number) => {
-  const newSelectedFoods = [...selectedFoods];
-  const existingFood = newSelectedFoods.find((f) => f.foodItemId === foodItemId);
-
-  if (existingFood) {
-    existingFood.portionSize += portionSize; // Tambahkan porsi jika makanan sudah ada
-  } else {
-    newSelectedFoods.push({ foodItemId, portionSize }); // Tambahkan makanan baru dengan porsi
-  }
-
-  setSelectedFoods(newSelectedFoods);
-  setSelectedFoodItem(null); // Reset setelah menambahkan makanan
-  setPortionSize(1); // Reset porsi
-};
-
-const handleRemoveFood = (foodItemId: number) => {
-  setSelectedFoods(selectedFoods.filter((f) => f.foodItemId !== foodItemId));
-};
-
-    // Handle form submission
-const handleSubmit = async () => {
-  if (!selectedMealType || selectedFoods.length === 0 || !selectedDate) {
-    setErrorMessage("Silakan lengkapi semua field yang diperlukan");
-    return;
-  }
-
-  setIsLoading(true);
-  setErrorMessage(null);
-
-  const foodInputs = selectedFoods.map((f) => ({
-    food_item_id: f.foodItemId,
-    portion_size: f.portionSize,
-  }));
-
-  const token = Cookies.get("token");
-  if (!token) {
-    setErrorMessage("Token tidak ditemukan. Silakan login.");
-    setIsLoading(false);
-    return;
-  }
-
-  const calorieIntake = calculateTotalCalories();
-
-  try {
-    // 1. Simpan food diary
-    await api.post(
-      "/food-diary/entries",
-      {
-        user_profiles_id: selectedProfile.id,
-        date: format(selectedDate, "yyyy-MM-dd"),
-        meal_type: selectedMealType,
-        food_inputs: foodInputs,
-        notes,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    // 2. Simpan calorie_intake ke tabel aktivitas
-    await api.post(
-  "/activities",
-  {
-    user_profiles_id: selectedProfile.id,
-    date: format(selectedDate, "yyyy-MM-dd"),
-    activity: "makan", // Tambahkan ini!
-    calorie_intake: calorieIntake,
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-
-
-    // Reset form
-    setSelectedDate(new Date());
-    setSelectedMealType(null);
-    setSelectedFoods([]);
-    setNotes("");
-    alert("Catatan makanan berhasil disimpan dan kalori tercatat ke aktivitas.");
-  } catch (error) {
-    console.error(error);
-    setErrorMessage("Gagal menyimpan catatan makanan atau aktivitas.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
-const getFoodDiaryByDate = async () => {
-  const token = Cookies.get("token");
-  if (!token) {
-    setErrorMessage("Token tidak ditemukan. Silakan login.");
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-
-    const response = await api.get("/food-diary/entries/date", {
-      params: {
-        date: format(selectedDate, "yyyy-MM-dd"),
-        user_profiles_id: selectedProfile.id,
-      },
-
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log(response.data.data);
-
-    setFoodDiary(response.data.data);
-  } catch (error) {
-    console.error("Error fetching food diary by date:", error);
-    // setErrorMessage("Terjadi kesalahan saat mengambil catatan makanan harian.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-useEffect(() => {
-  getFoodDiaryByDate();
-}, [selectedDate, selectedProfile]);
-
-// Definisikan tipe untuk FoodInput
+// Tipe untuk input makanan
 interface FoodInput {
   id: number;
   food_item: {
@@ -327,7 +42,7 @@ interface FoodInput {
   portion_size: number;
 }
 
-// Perbarui tipe untuk FoodDiaryEntry
+// Tipe untuk entri food diary
 interface FoodDiaryEntry {
   id: number;
   food_item_id: number;
@@ -335,69 +50,375 @@ interface FoodDiaryEntry {
   meal_type: string;
   portion_size: number;
   notes: string;
-  food_item?: { name: string; calories: number }; // Menambahkan field kalori
-  food_inputs: FoodInput[]; // Tambahkan food_inputs yang berisi array dari FoodInput
+  food_item?: { name: string; calories: number }; // Menambahkan informasi nama dan kalori makanan
+  food_inputs: FoodInput[]; // Array dari FoodInput yang berisi data makanan dan porsi
 }
 
-const groupFoodByMealType = (foodDiary: FoodDiaryEntry[]): Record<string, FoodDiaryEntry[]> => {
-  return foodDiary.reduce((acc, entry) => {
-    acc[entry.meal_type] = acc[entry.meal_type] || [];
-    acc[entry.meal_type].push(entry);
-    return acc;
-  }, {} as Record<string, FoodDiaryEntry[]>);
-};
+const mealTypes = [
+    { id: 'breakfast', name: 'Sarapan' },
+    { id: 'lunch', name: 'Makan Siang' },
+    { id: 'dinner', name: 'Makan Malam' },
+    { id: 'snack', name: 'Camilan' }
+];
 
-const getMealTypeLabel = (mealType: string) => {
-  const mealTypeLabels = {
-    'breakfast': 'Sarapan',
-    'lunch': 'Makan Siang',
-    'dinner': 'Makan Malam',
-    'snack': 'Camilan'
-  };
+export default function FoodDiaryPage() {
+  // State untuk tanggal yang dipilih
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // State untuk kategori makanan
+  const [foodCategories, setFoodCategories] = useState<FoodCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number>(0);
+
+  // State untuk item makanan berdasarkan kategori
+  const [foodItems, setFoodItems] = useState<Record<string, FoodItem[]>>({});
+  const [selectedFoodItem, setSelectedFoodItem] = useState<number | null>(null); // Untuk melacak ID makanan yang sedang dipilih
   
-  // Pastikan mealType.toLowerCase() adalah salah satu dari kunci objek
-  const lowerCaseMealType = mealType.toLowerCase() as 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  // State untuk ukuran porsi makanan yang dipilih
+  const [portionSize, setPortionSize] = useState<number>(1); // Ukuran porsi yang dimasukkan oleh pengguna
+  const [selectedFoods, setSelectedFoods] = useState<{ foodItemId: number; portionSize: number }[]>([]);
+
+  // State untuk tipe makanan yang dipilih (misalnya sarapan, makan siang, makan malam)
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+
+  // State untuk catatan dan error
+  const [notes, setNotes] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // State untuk memuat data dan pengaturan profil
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
+
+  // State untuk semua item makanan
+  const [allFoodItems, setAllFoodItems] = useState<FoodItem[]>([]);
+
+  // State untuk data food diary
+  const [foodDiary, setFoodDiary] = useState<any[]>([]);
+
+  const MotionButton = motion.create(Button);
+
+  // Fetch profiles milik user saat komponen di-mount
+  useEffect(() => {
+    // Ambil token dari cookie
+    const token = Cookies.get("token");
+
+    // Jika token ada, fetch profiles
+    if (token) {
+      api
+        .get("/profiles", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sertakan token di header
+          },
+        })
+        .then((res) => {
+          // Simpan data profiles dan pilih profile pertama
+          setProfiles(res.data);
+          setSelectedProfile(res.data[0]);
+        })
+        .catch((err) => {
+          // Tampilkan error jika gagal fetch
+          console.error("Gagal fetch profiles:", err);
+        });
+    }
+  }, []); // Hanya dijalankan saat pertama kali komponen dimuat
+
+  // Fetch kategori makanan saat komponen di-mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const token = Cookies.get("token");
+
+      // Jika token tidak ada, tampilkan pesan error
+      if (!token) {
+        setErrorMessage("Token tidak ditemukan. Silakan login.");
+        return;
+      }
+
+      try {
+        // Ambil kategori makanan dari API
+        const response = await api.get<{ data: FoodCategory[] }>("food-diary/categories", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sertakan token di header
+          },
+        });
+        setFoodCategories(response.data.data); // Set kategori makanan
+      } catch (error) {
+        // Tangani error jika gagal fetch
+        console.error("Error fetching categories:", error);
+        setErrorMessage("Terjadi kesalahan saat mengambil kategori makanan.");
+      }
+    };
+
+    fetchCategories(); // Panggil fungsi untuk fetch kategori
+  }, []); // Hanya dijalankan sekali saat komponen pertama kali di-mount
+
+  // Fetch semua makanan hanya sekali saat komponen pertama kali dimuat
+  useEffect(() => {
+    const fetchAllFoodItems = async () => {
+      const token = Cookies.get('token');
+
+      // Jika token tidak ada, tampilkan pesan error
+      if (!token) {
+        setErrorMessage("Token tidak ditemukan. Silakan login.");
+        return;
+      }
+
+      try {
+        // Ambil semua makanan dari API
+        const response = await api.get<{ data: FoodItem[] }>('food-diary/food-items/all', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sertakan token di header
+          },
+        });
+
+        // Simpan semua makanan yang diambil
+        setAllFoodItems(response.data.data);
+      } catch (error) {
+        // Tangani error jika gagal fetch
+        console.error("Error fetching all food items:", error);
+        setErrorMessage("Terjadi kesalahan saat mengambil semua makanan.");
+      }
+    };
+
+    fetchAllFoodItems(); // Panggil fungsi untuk fetch semua makanan
+  }, []); // Hanya dipanggil sekali saat komponen pertama kali dimuat
+
+  // Fetch food items berdasarkan kategori yang dipilih
+  useEffect(() => {
+    if (selectedCategory === 0) return; // Jika "Semua" dipilih, tidak perlu fetch kategori lainnya
+
+    const fetchFoodItems = async () => {
+      const token = Cookies.get('token');
+
+      // Jika token tidak ada, tampilkan pesan error
+      if (!token) {
+        setErrorMessage("Token tidak ditemukan. Silakan login.");
+        return;
+      }
+
+      try {
+        // Ambil food items berdasarkan kategori yang dipilih
+        const response = await api.get<{ data: FoodItem[] }>(`food-diary/food-items/${selectedCategory}`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sertakan token di header
+          },
+        });
+
+        // Simpan makanan berdasarkan kategori yang dipilih
+        setFoodItems((prevItems) => ({
+          ...prevItems,
+          [selectedCategory]: response.data.data,
+        }));
+      } catch (error) {
+        // Tangani error jika gagal fetch
+        console.error("Error fetching food items:", error);
+        setErrorMessage("Terjadi kesalahan saat mengambil makanan berdasarkan kategori.");
+      }
+    };
+
+    fetchFoodItems(); // Panggil fungsi untuk fetch food items berdasarkan kategori
+  }, [selectedCategory]); // Efek hanya dijalankan saat kategori dipilih
+
+  // Panggil getFoodDiaryByDate jika selectedDate atau selectedProfile berubah
+  useEffect(() => {
+    getFoodDiaryByDate();
+  }, [selectedDate, selectedProfile]);
+
   
-  return mealTypeLabels[lowerCaseMealType] || mealType.toUpperCase();
-};
+  // Menambahkan makanan dan porsi yang dipilih
+  const handleAddFood = (foodItemId: number) => {
+    const newSelectedFoods = [...selectedFoods]; // Salin data makanan yang sudah dipilih
+    const existingFood = newSelectedFoods.find((f) => f.foodItemId === foodItemId); // Cek apakah makanan sudah ada
 
-
-const handleDeleteMealType = async (mealType: string) => {
-  const token = Cookies.get("token");
-  if (!token || !selectedProfile) return;
-
-  const confirmed = confirm(`Hapus semua entri makanan untuk waktu makan "${getMealTypeLabel(mealType)}"?`);
-  if (!confirmed) return;
-
-  try {
-    const entriesToDelete = foodDiary.filter(
-  (entry) => entry.meal_type === mealType && entry.date === format(selectedDate, "yyyy-MM-dd")
-);
-
-
-    for (const entry of entriesToDelete) {
-      await api.delete(`/food-diary/entries/${entry.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    if (existingFood) {
+      // Kalau makanan sudah ada, tambahkan porsi
+      existingFood.portionSize += portionSize;
+    } else {
+      // Kalau belum ada, tambahkan makanan baru dengan porsi
+      newSelectedFoods.push({ foodItemId, portionSize });
     }
 
-    // Refresh ulang setelah semua berhasil dihapus
-    await getFoodDiaryByDate();
-  } catch (err) {
-    console.error("Gagal menghapus meal group:", err);
-    alert("Gagal menghapus entri makanan.");
-  }
-};
+    setSelectedFoods(newSelectedFoods); // Update makanan yang dipilih
+    setSelectedFoodItem(null); // Reset makanan yang dipilih
+    setPortionSize(1); // Reset porsi
+  };
 
+  // Menghapus makanan dari daftar yang dipilih
+  const handleRemoveFood = (foodItemId: number) => {
+    setSelectedFoods(selectedFoods.filter((f) => f.foodItemId !== foodItemId)); // Filter makanan yang ingin dihapus
+  };
 
-const calculateTotalCalories = () => {
-  return selectedFoods.reduce((total, food) => {
-    const item = allFoodItems.find((f) => f.id === food.foodItemId);
-    if (!item) return total;
-    return total + item.calories * food.portionSize;
-  }, 0);
-};
+  // Menangani pengiriman form
+  const handleSubmit = async () => {
+    // Cek apakah semua field sudah diisi
+    if (!selectedMealType || selectedFoods.length === 0 || !selectedDate) {
+      setErrorMessage("Silakan lengkapi semua field yang diperlukan");
+      return;
+    }
 
+    setIsLoading(true); // Menandakan sedang memuat
+    setErrorMessage(null); // Menghapus pesan error sebelumnya
+
+    // Siapkan data makanan yang dipilih
+    const foodInputs = selectedFoods.map((f) => ({
+      food_item_id: f.foodItemId,
+      portion_size: f.portionSize,
+    }));
+
+    // Ambil token dari cookies
+    const token = Cookies.get("token");
+    if (!token) {
+      setErrorMessage("Token tidak ditemukan. Silakan login.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Hitung total kalori yang dikonsumsi
+    const calorieIntake = calculateTotalCalories();
+
+    try {
+      // 1. Simpan entri food diary
+      await api.post(
+        "/food-diary/entries",
+        {
+          user_profiles_id: selectedProfile.id,
+          date: format(selectedDate, "yyyy-MM-dd"),
+          meal_type: selectedMealType,
+          food_inputs: foodInputs,
+          notes,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sertakan token
+          },
+        }
+      );
+
+      // 2. Simpan total kalori ke tabel aktivitas
+      await api.post(
+        "/activities",
+        {
+          user_profiles_id: selectedProfile.id,
+          date: format(selectedDate, "yyyy-MM-dd"),
+          activity: "makan", // Menyimpan aktivitas makan
+          calorie_intake: calorieIntake,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sertakan token
+          },
+        }
+      );
+
+      // Reset form setelah berhasil
+      setSelectedDate(new Date());
+      setSelectedMealType(null);
+      setSelectedFoods([]);
+      setNotes("");
+      alert("Catatan makanan berhasil disimpan dan kalori tercatat ke aktivitas.");
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Gagal menyimpan catatan makanan atau aktivitas.");
+    } finally {
+      setIsLoading(false); // Menandakan selesai memuat
+    }
+  };
+
+  // Ambil catatan makanan berdasarkan tanggal yang dipilih
+  const getFoodDiaryByDate = async () => {
+    const token = Cookies.get("token");
+
+    // Cek apakah token ada
+    if (!token) {
+      setErrorMessage("Token tidak ditemukan. Silakan login.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch catatan makanan berdasarkan tanggal dan profil pengguna
+      const response = await api.get("/food-diary/entries/date", {
+        params: {
+          date: format(selectedDate, "yyyy-MM-dd"), // Format tanggal
+          user_profiles_id: selectedProfile.id,    // ID profil pengguna
+        },
+        headers: {
+          Authorization: `Bearer ${token}`, // Sertakan token
+        },
+      });
+
+      console.log(response.data.data); // Tampilkan data di console
+
+      // Simpan data ke state foodDiary
+      setFoodDiary(response.data.data);
+    } catch (error) {
+      console.error("Error fetching food diary by date:", error);
+    } finally {
+      setIsLoading(false); // Set loading selesai
+    }
+  };
+
+  // Kelompokkan food diary berdasarkan jenis makanan
+  const groupFoodByMealType = (foodDiary: FoodDiaryEntry[]): Record<string, FoodDiaryEntry[]> => {
+    return foodDiary.reduce((acc, entry) => {
+      acc[entry.meal_type] = acc[entry.meal_type] || []; // Jika meal_type belum ada, buat array kosong
+      acc[entry.meal_type].push(entry); // Tambahkan entry ke array sesuai meal_type
+      return acc;
+    }, {} as Record<string, FoodDiaryEntry[]>); // Kembalikan hasil pengelompokan
+  };
+
+  // Dapatkan label untuk jenis makanan
+  const getMealTypeLabel = (mealType: string) => {
+    const mealTypeLabels = {
+      'breakfast': 'Sarapan',
+      'lunch': 'Makan Siang',
+      'dinner': 'Makan Malam',
+      'snack': 'Camilan'
+    };
+    
+    const lowerCaseMealType = mealType.toLowerCase() as 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    
+    // Kembalikan label yang sesuai atau jenis makanan dalam huruf kapital jika tidak ada
+    return mealTypeLabels[lowerCaseMealType] || mealType.toUpperCase();
+  };
+
+  // Hapus semua entri makanan berdasarkan jenis waktu makan
+  const handleDeleteMealType = async (mealType: string) => {
+    const token = Cookies.get("token");
+    if (!token || !selectedProfile) return; // Cek token dan profil
+
+    // Konfirmasi penghapusan
+    const confirmed = confirm(`Hapus semua entri makanan untuk waktu makan "${getMealTypeLabel(mealType)}"?`);
+    if (!confirmed) return; // Jika tidak dikonfirmasi, batalkan
+
+    try {
+      // Cari entri yang sesuai dengan mealType dan tanggal
+      const entriesToDelete = foodDiary.filter(
+        (entry) => entry.meal_type === mealType && entry.date === format(selectedDate, "yyyy-MM-dd")
+      );
+
+      // Hapus setiap entri yang ditemukan
+      for (const entry of entriesToDelete) {
+        await api.delete(`/food-diary/entries/${entry.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      // Refresh data setelah penghapusan
+      await getFoodDiaryByDate();
+    } catch (err) {
+      console.error("Gagal menghapus meal group:", err);
+      alert("Gagal menghapus entri makanan.");
+    }
+  };
+
+  // Hitung total kalori berdasarkan makanan yang dipilih
+  const calculateTotalCalories = () => {
+    return selectedFoods.reduce((total, food) => {
+      const item = allFoodItems.find((f) => f.id === food.foodItemId); // Cari item makanan berdasarkan ID
+      if (!item) return total; // Jika item tidak ditemukan, lanjutkan
+      return total + item.calories * food.portionSize; // Tambah kalori dengan porsi makanan
+    }, 0); // Mulai dengan total kalori 0
+  };
 
   return (
     <div className="space-y-6 p-4">
