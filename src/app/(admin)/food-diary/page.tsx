@@ -577,7 +577,7 @@ export default function FoodDiaryPage() {
       {/* Step 1 & Step 2: Pilih Tanggal dan Waktu Makan (Disusun dalam satu baris) */}
 <div className="space-y-4">
   {/* ComponentCard untuk Pilih Tanggal */}
-  <ComponentCard title="Pilih Tanggal">
+  <ComponentCard title="Pilih Tanggal" className="w-full">
     <DayPicker
       mode="single"
       selected={selectedDate}
