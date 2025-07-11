@@ -421,7 +421,7 @@ export default function FoodDiaryPage() {
   };
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-8">
     {/* Error Message Display */}
     {errorMessage && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -439,52 +439,61 @@ export default function FoodDiaryPage() {
     )}
     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Catatan Makanan Harian</h2>
     
+    {/* Greeting */}
+    <div className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+        {selectedProfile ? `Hai, ${selectedProfile.name}!` : "Selamat datang!"}
+    </div>
     {/* Pilih Pengguna */}
-    <div className="space-y-8">
-        <div className="w-full">
-            <label
-                htmlFor="profile-select"
-                className="block text-sm font-medium text-gray-700 dark:text-white mb-1"
+    <div className="w-full">
+        <label
+            htmlFor="profile-select"
+            className="block text-sm font-medium text-gray-700 dark:text-white mb-1"
+        >
+            Pilih Pengguna
+        </label>
+
+        <div className="relative">
+            <select
+                id="profile-select"
+                value={selectedProfile?.id || ""}
+                onChange={(e) => {
+                    const p = profiles.find((p) => p.id === +e.target.value)!;
+                    setSelectedProfile(p);
+                }}
+                className="
+      block w-full pl-10 pr-3 py-2
+      bg-white dark:bg-gray-800
+      border border-gray-300 dark:border-gray-700
+      rounded-md text-sm text-gray-800 dark:text-gray-200
+      focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500
+      appearance-none
+    "
             >
-                Pilih Pengguna
-            </label>
-
-            <div className="relative">
-                <select
-                    id="profile-select"
-                    value={selectedProfile?.id || ""}
-                    onChange={(e) => {
-                        const p = profiles.find((p) => p.id === +e.target.value)!;
-                        setSelectedProfile(p);
-                    }}
-                    className=" block w-full pl-10 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500appearance-none"
-                >
-                    <option value="" disabled>
-                        — Pilih Profil —
+                <option value="" disabled>
+                    — Pilih Profil —
+                </option>
+                {profiles.map((p) => (
+                    <option key={p.id} value={p.id}>
+                        {p.name}
                     </option>
-                    {profiles.map((p) => (
-                        <option key={p.id} value={p.id}>
-                            {p.name}
-                        </option>
-                    ))}
-                </select>
+                ))}
+            </select>
 
-                {/* Icon user di kiri */}
-                <User2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-600 pointer-events-none" />
+            {/* Icon user di kiri */}
+            <User2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-600 pointer-events-none" />
 
-                {/* Chevron kanan */}
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-600 pointer-events-none" />
-            </div>
-
-            {selectedProfile && (
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Berat: <strong>{selectedProfile.weight} kg</strong>, Umur:{" "}
-                    <strong>{selectedProfile.age} tahun</strong>, Level:{" "}
-                    <strong>{selectedProfile.activity_level}</strong>, BMR:{" "}
-                    <strong>{Math.round(selectedProfile.bmr)}</strong>
-                </div>
-            )}
+            {/* Chevron kanan */}
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-600 pointer-events-none" />
         </div>
+
+        {selectedProfile && (
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Berat: <strong>{selectedProfile.weight} kg</strong>, Umur:{" "}
+                <strong>{selectedProfile.age} tahun</strong>, Level:{" "}
+                <strong>{selectedProfile.activity_level}</strong>, BMR:{" "}
+                <strong>{Math.round(selectedProfile.bmr)}</strong>
+            </div>
+        )}
     </div>
 
     {/* ◀️ Date Navigation ▶️ */}
