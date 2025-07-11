@@ -575,9 +575,9 @@ export default function FoodDiaryPage() {
     
 
       {/* Step 1 & Step 2: Pilih Tanggal dan Waktu Makan (Disusun dalam satu baris) */}
-<div className="flex justify-between space-x-4">
+<div className="space-y-4">
   {/* ComponentCard untuk Pilih Tanggal */}
-  <ComponentCard title="Pilih Tanggal" className="flex-1">
+  <ComponentCard title="Pilih Tanggal">
     <DayPicker
       mode="single"
       selected={selectedDate}
@@ -594,7 +594,7 @@ export default function FoodDiaryPage() {
 
   {/* ComponentCard untuk Pilih Waktu Makan */}
   {selectedDate && (
-    <ComponentCard title="Pilih Waktu Makan" className="flex-1">
+    <ComponentCard title="Pilih Waktu Makan">
       <div className="grid grid-cols-1 gap-4">
         {mealTypes.map((meal) => (
           <Button
