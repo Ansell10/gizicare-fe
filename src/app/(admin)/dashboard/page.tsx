@@ -668,6 +668,12 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
+    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h2>
+    
+    {/* Greeting */}
+    <div className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+        {selectedProfile ? `Hai, ${selectedProfile.name}!` : "Selamat datang!"}
+    </div>
       {/* Pilih Pengguna */}
       <div className="w-full">
         <label
@@ -722,8 +728,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex w-full space-x-1">
-        <div className="w-1/3">
+      <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 w-full">
+        <div className="w-full md:w-1/3">
           <ComponentCard title="Ringkasan Profile Pengguna">
             {selectedProfile && (
               <div className="flex flex-wrap text-gray-500 dark:text-gray-400">
@@ -926,7 +932,7 @@ const Dashboard = () => {
           </ComponentCard>
         </div>
         
-        <div className="w-2/3">
+        <div  className="w-full md:w-2/3">
           {/* Calories Chart */}
           <ComponentCard title="Grafik Kalori">
             {/* Calories Summary Cards */}
