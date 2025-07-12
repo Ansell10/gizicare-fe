@@ -137,7 +137,7 @@ export default function NotificationDropdown() {
   };
 
   const mealTimes = [
-    { type: "Breakfast", hour: 7, minute: 0 },
+    { type: "Breakfast", hour: 1, minute: 44 },
     { type: "Lunch", hour: 12, minute: 0 },
     { type: "Dinner", hour: 18, minute: 0 },
   ];
