@@ -137,7 +137,7 @@ export default function NotificationDropdown() {
   };
 
   const mealTimes = [
-    { type: "Breakfast", hour: 1, minute: 44 },
+    { type: "Breakfast", hour: 1, minute: 50 },
     { type: "Lunch", hour: 12, minute: 0 },
     { type: "Dinner", hour: 18, minute: 0 },
   ];
@@ -146,6 +146,7 @@ export default function NotificationDropdown() {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
+    console.log(`Checking time: ${currentHour}:${currentMinute}`); // Debug log
 
     // Periksa setiap waktu makan yang sudah ditentukan
     for (let meal of mealTimes) {
