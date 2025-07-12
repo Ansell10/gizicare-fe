@@ -1,6 +1,4 @@
 "use client";
-import Image from "next/image";
-import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
@@ -12,23 +10,26 @@ export default function NotificationDropdown() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [timeToEat, setTimeToEat] = useState(null); // Menyimpan jenis makanan yang waktunya tiba
+  const [showReminder, setShowReminder] = useState(false); // Status untuk menampilkan pengingat
 
-  function toggleDropdown() {
+  // Toggle dropdown and fetch notifications if dropdown is opened
+  const toggleDropdown = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {
       fetchNotifications();
     }
-  }
+  };
 
-  function closeDropdown() {
+  const closeDropdown = () => {
     setIsOpen(false);
-  }
+  };
 
   const handleClick = () => {
     toggleDropdown();
   };
 
-  // Fetch notifications from Laravel backend
+  // Fetch notifications from the backend
   const fetchNotifications = async () => {
     const token = Cookies.get("token");
     if (!token) return;
@@ -36,13 +37,8 @@ export default function NotificationDropdown() {
     setLoading(true);
     try {
       const response = await api.get("/notifications", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          limit: 20,
-          include_read: true
-        }
+        headers: { Authorization: `Bearer ${token}` },
+        params: { limit: 20, include_read: true },
       });
 
       setNotifications(response.data.notifications || []);
@@ -60,22 +56,20 @@ export default function NotificationDropdown() {
     if (!token) return;
 
     try {
-      await api.patch(`/notifications/${notificationId}/read`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await api.patch(
+        `/notifications/${notificationId}/read`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === notificationId 
-            ? { ...notif, is_read: true }
-            : notif
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === notificationId ? { ...notif, is_read: true } : notif
         )
       );
-      
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
@@ -89,66 +83,99 @@ export default function NotificationDropdown() {
 
     if (diffInMinutes < 1) return "Just now";
     if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours} hr ago`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
   };
 
   // Get notification icon based on type
   const getNotificationIcon = (type, data) => {
     switch (type) {
-      case 'meal_reminder':
-        const mealType = data?.meal_type || 'meal';
-        switch (mealType) {
-          case 'breakfast':
-            return '🥐';
-          case 'lunch':
-            return '🥗';
-          case 'dinner':
-            return '🍽️';
-          case 'snack':
-            return '🍎';
-          default:
-            return '🍴';
-        }
-      case 'intermittent_fasting':
-        return '⏰';
-      case 'health_reminder':
-        return '💊';
+      case "meal_reminder":
+        return getMealIcon(data);
+      case "intermittent_fasting":
+        return "⏰";
+      case "health_reminder":
+        return "💊";
       default:
-        return '🔔';
+        return "🔔";
     }
   };
 
   // Get notification background color based on type
   const getNotificationBgColor = (type) => {
     switch (type) {
-      case 'meal_reminder':
-        return 'bg-orange-100 text-orange-600';
-      case 'intermittent_fasting':
-        return 'bg-blue-100 text-blue-600';
-      case 'health_reminder':
-        return 'bg-green-100 text-green-600';
+      case "meal_reminder":
+        return "bg-orange-100 text-orange-600";
+      case "intermittent_fasting":
+        return "bg-blue-100 text-blue-600";
+      case "health_reminder":
+        return "bg-green-100 text-green-600";
       default:
-        return 'bg-gray-100 text-gray-600';
+        return "bg-gray-100 text-gray-600";
     }
   };
+
+  // Get the icon for meal reminder
+  const getMealIcon = (data) => {
+    const mealType = data?.meal_type || "meal";
+    switch (mealType) {
+      case "breakfast":
+        return "🥐";
+      case "lunch":
+        return "🥗";
+      case "dinner":
+        return "🍽️";
+      case "snack":
+        return "🍎";
+      default:
+        return "🍴";
+    }
+  };
+
+  const mealTimes = [
+    { type: "Breakfast", hour: 7, minute: 0 },
+    { type: "Lunch", hour: 12, minute: 0 },
+    { type: "Dinner", hour: 18, minute: 0 },
+  ];
+
+  const checkMealTime = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Periksa setiap waktu makan yang sudah ditentukan
+    for (let meal of mealTimes) {
+      // Jika waktu sekarang cocok dengan waktu makan
+      if (meal.hour === currentHour && meal.minute === currentMinute) {
+        setTimeToEat(meal.type); // Set pengingat untuk jenis makanan yang sesuai
+        setShowReminder(true); // Menampilkan pengingat
+        break;
+      }
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(checkMealTime, 60000); // Cek setiap 1 menit
+    return () => clearInterval(interval); // Bersihkan interval saat komponen unmount
+  }, []);
 
   // Fetch notifications on component mount
   useEffect(() => {
     fetchNotifications();
-    
+
     // Set up polling for new notifications every 5 minutes
     const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="relative">
+      {/* Notification Icon Button */}
       <button
         className="relative dropdown-toggle flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
         onClick={handleClick}
@@ -173,7 +200,14 @@ export default function NotificationDropdown() {
           />
         </svg>
       </button>
-      
+
+      {showReminder && (
+        <div className="notification fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white p-4 rounded-lg shadow-lg">
+          <p>It's time for {timeToEat}!</p>
+        </div>
+      )}
+
+      {/* Notification Dropdown */}
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
@@ -209,6 +243,7 @@ export default function NotificationDropdown() {
           </button>
         </div>
 
+        {/* Notifications List */}
         <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
           {loading ? (
             <li className="flex items-center justify-center py-8">
@@ -221,10 +256,11 @@ export default function NotificationDropdown() {
             </li>
           ) : (
             notifications.map((notification) => {
-              const data = typeof notification.data === 'string' 
-                ? JSON.parse(notification.data) 
-                : notification.data || {};
-              
+              const data =
+                typeof notification.data === "string"
+                  ? JSON.parse(notification.data)
+                  : notification.data || {};
+
               return (
                 <li key={notification.id}>
                   <DropdownItem
@@ -235,10 +271,16 @@ export default function NotificationDropdown() {
                       closeDropdown();
                     }}
                     className={`flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 ${
-                      !notification.is_read ? 'bg-orange-50 dark:bg-orange-900/20' : ''
+                      !notification.is_read
+                        ? "bg-orange-50 dark:bg-orange-900/20"
+                        : ""
                     }`}
                   >
-                    <span className={`relative flex items-center justify-center w-10 h-10 rounded-full ${getNotificationBgColor(notification.type)}`}>
+                    <span
+                      className={`relative flex items-center justify-center w-10 h-10 rounded-full ${getNotificationBgColor(
+                        notification.type
+                      )}`}
+                    >
                       <span className="text-lg">
                         {getNotificationIcon(notification.type, data)}
                       </span>
@@ -251,22 +293,25 @@ export default function NotificationDropdown() {
                       <span className="mb-1.5 block text-theme-sm text-gray-800 dark:text-white/90 font-medium">
                         {notification.title}
                       </span>
-                      
+
                       <span className="mb-2 block text-theme-sm text-gray-600 dark:text-gray-400">
                         {notification.message}
                       </span>
 
                       {/* Additional context for meal reminders */}
-                      {notification.type === 'meal_reminder' && data.meal_type && (
-                        <span className="mb-2 block text-xs text-gray-500 dark:text-gray-500">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                            {data.meal_type.charAt(0).toUpperCase() + data.meal_type.slice(1)} Reminder
+                      {notification.type === "meal_reminder" &&
+                        data.meal_type && (
+                          <span className="mb-2 block text-xs text-gray-500 dark:text-gray-500">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                              {data.meal_type.charAt(0).toUpperCase() +
+                                data.meal_type.slice(1)}{" "}
+                              Reminder
+                            </span>
                           </span>
-                        </span>
-                      )}
+                        )}
 
                       {/* Intermittent fasting context */}
-                      {notification.type === 'intermittent_fasting' && (
+                      {notification.type === "intermittent_fasting" && (
                         <span className="mb-2 block text-xs text-gray-500 dark:text-gray-500">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             Intermittent Fasting
@@ -280,7 +325,9 @@ export default function NotificationDropdown() {
                       )}
 
                       <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                        <span className="capitalize">{notification.type.replace('_', ' ')}</span>
+                        <span className="capitalize">
+                          {notification.type.replace("_", " ")}
+                        </span>
                         <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                         <span>{formatTimeAgo(notification.created_at)}</span>
                       </span>
@@ -292,28 +339,23 @@ export default function NotificationDropdown() {
           )}
         </ul>
 
-        {/* Footer with "View All" or "Mark All Read" */}
+        {/* Footer with "Mark All Read" button */}
         {notifications.length > 0 && (
           <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-700">
             <div className="flex justify-between gap-2">
               <button
                 onClick={() => {
                   // Mark all as read logic
-                  const unreadNotifications = notifications.filter(n => !n.is_read);
-                  unreadNotifications.forEach(n => markAsRead(n.id));
+                  const unreadNotifications = notifications.filter(
+                    (n) => !n.is_read
+                  );
+                  unreadNotifications.forEach((n) => markAsRead(n.id));
                 }}
                 className="flex-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 disabled={unreadCount === 0}
               >
                 Mark all read
               </button>
-              {/* <Link
-                href="/notifications"
-                onClick={closeDropdown}
-                className="flex-1 px-3 py-2 text-sm text-center text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 transition-colors"
-              >
-                View all
-              </Link> */}
             </div>
           </div>
         )}

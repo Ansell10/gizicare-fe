@@ -7,7 +7,7 @@ import "react-day-picker/dist/style.css";
 import api from "@/lib/axios";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
-
+ 
 // Icon
 import { ArrowLeft, ArrowRight, Trash2, User2, ChevronDown } from "lucide-react";
 
@@ -422,22 +422,22 @@ export default function FoodDiaryPage() {
 
   return (
     <div className="space-y-8">
-    
+
     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Catatan Makanan Harian</h2>
     
     {/* Greeting */}
     <div className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-        {selectedProfile ? `Hai, ${selectedProfile.name}!` : "Selamat datang!"}
+      {selectedProfile ? `Hai, ${selectedProfile.name}!` : "Selamat datang!"}
     </div>
+
     {/* Pilih Pengguna */}
     <div className="w-full">
-        <label
-            htmlFor="profile-select"
-            className="block text-sm font-medium text-gray-700 dark:text-white mb-1"
-        >
-            Pilih Pengguna
-        </label>
-
+      <label
+        htmlFor="profile-select"
+        className="block text-sm font-medium text-gray-700 dark:text-white mb-1"
+      >
+        Pilih Pengguna
+      </label>
         <div className="relative">
             <select
                 id="profile-select"
@@ -446,14 +446,7 @@ export default function FoodDiaryPage() {
                     const p = profiles.find((p) => p.id === +e.target.value)!;
                     setSelectedProfile(p);
                 }}
-                className="
-      block w-full pl-10 pr-3 py-2
-      bg-white dark:bg-gray-800
-      border border-gray-300 dark:border-gray-700
-      rounded-md text-sm text-gray-800 dark:text-gray-200
-      focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500
-      appearance-none
-    "
+                className="block w-full pl-10 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 appearance-none"
             >
                 <option value="" disabled>
                     — Pilih Profil —
