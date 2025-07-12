@@ -41,6 +41,20 @@ export default function NotificationDropdown() {
         params: { limit: 20, include_read: true },
       });
 
+      // Menambahkan pengingat makan ke dalam notifikasi
+      if (showReminder && timeToEat) {
+        const mealReminder = {
+          id: "meal-reminder", // Unik ID
+          type: "meal_reminder",
+          title: `Saatnya untuk ${timeToEat}!`, // Bahasa Indonesia
+          message: `Jangan lupa makan ${timeToEat}.`, // Bahasa Indonesia
+          is_read: false, // Asumsikan belum dibaca
+          created_at: new Date().toISOString(), // Waktu saat pengingat
+          data: { meal_type: timeToEat.toLowerCase() },
+        };
+        response.data.notifications.push(mealReminder); // Menambahkan pengingat makan ke daftar notifikasi
+      }
+
       setNotifications(response.data.notifications || []);
       setUnreadCount(response.data.unread_count || 0);
     } catch (error) {
@@ -137,7 +151,7 @@ export default function NotificationDropdown() {
   };
 
   const mealTimes = [
-    { type: "Breakfast", hour: 1, minute: 50 },
+    { type: "Breakfast", hour: 2, minute: 00 },
     { type: "Lunch", hour: 12, minute: 0 },
     { type: "Dinner", hour: 18, minute: 0 },
   ];
