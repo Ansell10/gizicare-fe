@@ -175,9 +175,15 @@ export default function NotificationDropdown() {
   };
 
   useEffect(() => {
-    const interval = setInterval(checkMealTime, 1 * 60 * 1000); // Cek setiap 1 menit
-    return () => clearInterval(interval); // Bersihkan interval saat komponen unmount
-  }, []);
+    // Jalankan checkMealTime langsung saat komponen pertama kali dipasang
+    checkMealTime();
+
+    // Set interval untuk mengecek setiap 5 menit
+    const interval = setInterval(checkMealTime, 5 * 60 * 1000); // Cek setiap 5 menit
+
+    // Bersihkan interval saat komponen unmount
+    return () => clearInterval(interval);
+  }, []); // Dependency array kosong berarti hanya dijalankan sekali saat mount
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -218,9 +224,9 @@ export default function NotificationDropdown() {
       </button>
 
       {showReminder && (
-        <div className="notification fixed bottom-10 left-5 transform bg-orange-500 text-white p-4 rounded-lg shadow-lg flex items-center">
+        <div className="notification fixed bottom-10 left-5 transform bg-brand-500 text-white p-4 rounded-lg shadow-lg flex items-center">
           {/* Menampilkan hanya icon pada layar kecil */}
-          <span className="mr-2 text-xl sm:hidden">
+          <span className="text-xs sm:hidden">
             {getMealIcon({ meal_type: timeToEat.toLowerCase() })}
           </span>
 
