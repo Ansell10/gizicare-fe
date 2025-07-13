@@ -594,7 +594,7 @@ export default function FoodDiaryPage() {
                           >
                             <span>{input.food_item.name}</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {parseFloat(input.portion_size).toFixed(0)} porsi
+                              {(input.portion_size * 100).toFixed(0)} gram
                             </span>
                           </li>
                         ))}
