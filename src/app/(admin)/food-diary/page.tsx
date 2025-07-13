@@ -80,7 +80,7 @@ export default function FoodDiaryPage() {
   const [selectedFoodItem, setSelectedFoodItem] = useState<number | null>(null); // Untuk melacak ID makanan yang sedang dipilih
 
   // State untuk ukuran porsi makanan yang dipilih
-  const [portionSize, setPortionSize] = useState<number>(100); // Ukuran porsi yang dimasukkan oleh pengguna
+  const [portionSize, setPortionSize] = useState<number>(1); // Ukuran porsi yang dimasukkan oleh pengguna
   const [selectedFoods, setSelectedFoods] = useState<
     { foodItemId: number; portionSize: number }[]
   >([]);
@@ -282,16 +282,11 @@ export default function FoodDiaryPage() {
     setErrorMessage(null); // Menghapus pesan error sebelumnya
 
     // Siapkan data makanan yang dipilih
-    // Siapkan data makanan yang dipilih
-    const foodInputs = selectedFoods.map((f) => {
-      const portionInGrams = f.portionSize; // Ukuran porsi yang dimasukkan dalam gram
-      const portions = portionInGrams / 100; // Mengonversi gram menjadi porsi (1 porsi = 100 gram)
-
-      return {
-        food_item_id: f.foodItemId,
-        portion_size: portions, // Porsi dalam satuan porsi yang dihitung dari gram
-      };
-    });
+    const foodInputs = selectedFoods.map((f) => ({
+      food_item_id: f.foodItemId,
+      portion_size: f.portionSize,
+    }));
+    console.log("Food inputs:", foodInputs);
 
     // Ambil token dari cookies
     const token = Cookies.get("token");
