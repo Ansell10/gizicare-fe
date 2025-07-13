@@ -151,9 +151,9 @@ export default function NotificationDropdown() {
   };
 
   const mealTimes = [
-    { type: "Sarapan", startHour: 6, endHour: 10 },
-    { type: "Makan Siang", startHour: 11, endHour: 17 },
-    { type: "Makan Malan", startHour: 18, endHour: 21 },
+    { type: "Sarapan", startHour: 6, endHour: 9 },
+    { type: "Makan Siang", startHour: 12, endHour: 14 },
+    { type: "Makan Malan", startHour: 17, endHour: 19 },
   ];
 
   const checkMealTime = () => {
