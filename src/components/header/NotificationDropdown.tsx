@@ -137,11 +137,11 @@ export default function NotificationDropdown() {
   const getMealIcon = (data) => {
     const mealType = data?.meal_type || "meal";
     switch (mealType) {
-      case "breakfast":
+      case "sarapan":
         return "🌅";
-      case "lunch":
+      case "makan siang":
         return "🌞";
-      case "dinner":
+      case "makan malam":
         return "🌙";
       case "snack":
         return "🍎";
