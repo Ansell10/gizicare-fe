@@ -138,11 +138,11 @@ export default function NotificationDropdown() {
     const mealType = data?.meal_type || "meal";
     switch (mealType) {
       case "breakfast":
-        return "🥐";
+        return "🌅";
       case "lunch":
-        return "🥗";
+        return "🌞";
       case "dinner":
-        return "🍽️";
+        return "🌙";
       case "snack":
         return "🍎";
       default:
@@ -151,9 +151,9 @@ export default function NotificationDropdown() {
   };
 
   const mealTimes = [
-    { type: "Breakfast", startHour: 6, endHour: 10 },
-    { type: "Lunch", startHour: 11, endHour: 17 },
-    { type: "Dinner", startHour: 18, endHour: 21 },
+    { type: "Sarapan", startHour: 6, endHour: 10 },
+    { type: "Makan Siang", startHour: 11, endHour: 17 },
+    { type: "Makan Malan", startHour: 18, endHour: 21 },
   ];
 
   const checkMealTime = () => {
@@ -235,7 +235,7 @@ export default function NotificationDropdown() {
             <span className="mr-2 text-xl">
               {getMealIcon({ meal_type: timeToEat.toLowerCase() })}
             </span>
-            <p>It's time for {timeToEat}!</p>
+            <p>Waktunya {timeToEat}!</p>
           </span>
         </div>
       )}
