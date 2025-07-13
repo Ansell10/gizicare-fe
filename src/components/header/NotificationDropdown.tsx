@@ -151,9 +151,9 @@ export default function NotificationDropdown() {
   };
 
   const mealTimes = [
-    { type: "Breakfast", hour: 2, minute: 0 },
-    { type: "Lunch", hour: 12, minute: 0 },
-    { type: "Dinner", hour: 18, minute: 0 },
+    { type: "Breakfast", startHour: 6, endHour: 10 },
+    { type: "Lunch", startHour: 11, endHour: 17 },
+    { type: "Dinner", startHour: 18, endHour: 21 },
   ];
 
   const checkMealTime = () => {
@@ -162,19 +162,20 @@ export default function NotificationDropdown() {
     const currentMinute = now.getMinutes();
     console.log(`Checking time: ${currentHour}:${currentMinute}`); // Debug log
 
-    // Periksa setiap waktu makan yang sudah ditentukan
     for (let meal of mealTimes) {
-      // Jika waktu sekarang cocok dengan waktu makan
-      if (meal.hour === currentHour && meal.minute === currentMinute) {
+      // Periksa apakah waktu sekarang berada dalam rentang waktu makan
+      if (currentHour >= meal.startHour && currentHour <= meal.endHour) {
         setTimeToEat(meal.type); // Set pengingat untuk jenis makanan yang sesuai
         setShowReminder(true); // Menampilkan pengingat
         break;
+      } else {
+        setShowReminder(false); // Tidak menampilkan pengingat jika tidak dalam rentang waktu makan
       }
     }
   };
 
   useEffect(() => {
-    const interval = setInterval(checkMealTime, 60000); // Cek setiap 1 menit
+    const interval = setInterval(checkMealTime, 5 * 60 * 1000); // Cek setiap 5 menit
     return () => clearInterval(interval); // Bersihkan interval saat komponen unmount
   }, []);
 
@@ -217,8 +218,19 @@ export default function NotificationDropdown() {
       </button>
 
       {showReminder && (
-        <div className="notification fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white p-4 rounded-lg shadow-lg">
-          <p>It's time for {timeToEat}!</p>
+        <div className="notification fixed bottom-10 left-5 transform bg-orange-500 text-white p-4 rounded-lg shadow-lg flex items-center">
+          {/* Menampilkan hanya icon pada layar kecil */}
+          <span className="mr-2 text-xl sm:hidden">
+            {getMealIcon({ meal_type: timeToEat.toLowerCase() })}
+          </span>
+
+          {/* Menampilkan icon + teks pada layar besar */}
+          <span className="hidden sm:flex items-center">
+            <span className="mr-2 text-xl">
+              {getMealIcon({ meal_type: timeToEat.toLowerCase() })}
+            </span>
+            <p>It's time for {timeToEat}!</p>
+          </span>
         </div>
       )}
 
