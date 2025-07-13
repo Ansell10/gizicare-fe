@@ -175,7 +175,7 @@ export default function NotificationDropdown() {
   };
 
   useEffect(() => {
-    const interval = setInterval(checkMealTime, 5 * 60 * 1000); // Cek setiap 5 menit
+    const interval = setInterval(checkMealTime, 1 * 60 * 1000); // Cek setiap 1 menit
     return () => clearInterval(interval); // Bersihkan interval saat komponen unmount
   }, []);
 
