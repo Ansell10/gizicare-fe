@@ -80,7 +80,7 @@ export default function FoodDiaryPage() {
   const [selectedFoodItem, setSelectedFoodItem] = useState<number | null>(null); // Untuk melacak ID makanan yang sedang dipilih
 
   // State untuk ukuran porsi makanan yang dipilih
-  const [portionSize, setPortionSize] = useState<number>(1); // Ukuran porsi yang dimasukkan oleh pengguna
+  const [portionSize, setPortionSize] = useState<number>(100); // Ukuran porsi yang dimasukkan oleh pengguna
   const [selectedFoods, setSelectedFoods] = useState<
     { foodItemId: number; portionSize: number }[]
   >([]);
