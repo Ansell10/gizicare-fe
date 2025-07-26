@@ -175,25 +175,10 @@ export default function NotificationDropdown() {
   };
 
   useEffect(() => {
-    // Jalankan checkMealTime langsung saat komponen pertama kali dipasang
+    // Jalankan kedua fungsi saat komponen pertama kali dimuat
     checkMealTime();
-
-    // Set interval untuk mengecek setiap 5 menit
-    const interval = setInterval(checkMealTime, 5 * 60 * 1000); // Cek setiap 5 menit
-
-    // Bersihkan interval saat komponen unmount
-    return () => clearInterval(interval);
-  }, []); // Dependency array kosong berarti hanya dijalankan sekali saat mount
-
-  // Fetch notifications on component mount
-  useEffect(() => {
     fetchNotifications();
-
-    // Set up polling for new notifications every 5 minutes
-    const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // Dependency array kosong berarti hanya dijalankan sekali saat mount
 
   return (
     <div className="relative">
