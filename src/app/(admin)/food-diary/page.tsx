@@ -262,7 +262,7 @@ export default function FoodDiaryPage() {
 
     setSelectedFoods(newSelectedFoods); // Update makanan yang dipilih
     setSelectedFoodItem(null); // Reset makanan yang dipilih
-    setPortionSize(1); // Reset porsi
+    setPortionSize(100); // Reset porsi
   };
 
   // Menghapus makanan dari daftar yang dipilih
